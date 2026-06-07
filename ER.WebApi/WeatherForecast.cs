@@ -1,4 +1,4 @@
-namespace ExpenseReport.WebApi;
+namespace ER.WebApi;
 
 public class WeatherForecast
 {

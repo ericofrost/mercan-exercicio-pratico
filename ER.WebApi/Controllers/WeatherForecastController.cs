@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace ExpenseReport.WebApi.Controllers;
+namespace ER.WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
