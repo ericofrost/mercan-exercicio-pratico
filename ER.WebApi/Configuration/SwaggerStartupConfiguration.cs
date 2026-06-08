@@ -2,8 +2,15 @@
 
 namespace ER.WebApi.Configuration;
 
+/// <summary>
+/// Configures Swagger/OpenAPI generation and JWT bearer security definitions for the API.
+/// </summary>
 public static class SwaggerStartupConfiguration
 {
+    /// <summary>
+    /// Registers Swagger generation services with JWT bearer authentication support.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
     public static void ConfigureSwagger(this IServiceCollection services)
     {
         services.AddSwaggerGen(options =>

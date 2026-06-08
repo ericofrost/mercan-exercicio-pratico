@@ -1,5 +1,6 @@
 using ER.Application.DI;
 using ER.Infrastructure.DI;
+using ER.Infrastructure.Seeds;
 using ER.WebApi.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,12 @@ builder.Services.ConfigureInfrastructureDependencyInjection(builder.Configuratio
 builder.Services.ConfigureApplicationDependencyInjection(builder.Configuration);
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitializer>();
+    await initializer.InitializeAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -5,3 +5,4 @@ global using ER.Domain.Specifications;
 global using ER.Domain.Base;
 global using Microsoft.AspNetCore.Identity;
 global using System;
+global using System.Diagnostics.CodeAnalysis;

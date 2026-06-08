@@ -7,8 +7,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ER.Application.DI;
 
+/// <summary>
+/// Registers application-layer services in the dependency injection container.
+/// </summary>
 public static class Setup
 {
+    /// <summary>
+    /// Adds application services required by the ExpenseReports API.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">Application configuration.</param>
     public static void ConfigureApplicationDependencyInjection(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();

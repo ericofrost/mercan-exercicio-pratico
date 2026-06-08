@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Text;
-using ER.Domain.Shared;
 using ER.Application.Interfaces.Authentication;
+using ER.Domain.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -9,22 +9,29 @@ using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredCla
 
 namespace ER.Application.Services.Authentication;
 
+/// <summary>
+/// Creates signed JWT access tokens using symmetric HMAC SHA-256 credentials from application configuration.
+/// </summary>
 public class JwtTokenGeneratorService : ITokenGeneratorService
 {
     private readonly JsonWebTokenHandler _handler = new();
     private readonly IConfiguration _configuration;
 
     /// <summary>
-    /// Default parameter constructor
+    /// Initializes a new instance of the token generator.
     /// </summary>
-    /// <param name="configuration">Configuration provided for retrieving values</param>
+    /// <param name="configuration">Application configuration containing JWT settings.</param>
     public JwtTokenGeneratorService(IConfiguration configuration)
     {
         _configuration = configuration;
     }
 
+    /// <inheritdoc />
+    /// <exception cref="FormatException">
+    /// Thrown when <c>Jwt:ExpiryMinutes</c> is present but not a valid integer.
+    /// </exception>
     public async ValueTask<string?> GenerateTokenAsync(GenerateTokenRequest request)
-    {   
+    {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
 
         var expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "30");
@@ -44,9 +51,9 @@ public class JwtTokenGeneratorService : ITokenGeneratorService
                 [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString()
             }
         };
-        
+
         var token = _handler.CreateToken(descriptor);
-        
+
         return await ValueTask.FromResult(token);
     }
 }

@@ -1,17 +1,22 @@
 ﻿using ER.Application.Authentication;
 using ER.Application.Common;
 using ER.Application.Interfaces.Authentication;
+using ER.Domain.Configuration;
 using ER.Domain.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace ER.Application.Services.Authentication;
 
-public class AuthenticationService(UserManager<ApplicationUser> userManager, ITokenGeneratorService tokenGeneratorService, IConfiguration configuration) : IAuthenticationService
+/// <summary>
+/// Validates tenant-scoped credentials through ASP.NET Identity and issues JWT access tokens for authenticated employees.
+/// </summary>
+public class AuthenticationService(UserManager<ApplicationUser> userManager, ITokenGeneratorService tokenGeneratorService, IOptions<JwtSettings> configuration) : IAuthenticationService
 {
     private const string InvalidCredentialsMessage = "Invalid credentials.";
 
+    /// <inheritdoc />
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var user = await userManager.Users.Include(u => u.Employee).FirstOrDefaultAsync(
@@ -22,9 +27,7 @@ public class AuthenticationService(UserManager<ApplicationUser> userManager, ITo
             return Result<LoginResponse>.Failure(InvalidCredentialsMessage);
         }
 
-        var expiryMinutes = int.Parse(configuration["Jwt:ExpiryMinutes"] ?? "30");
-        
-        var expiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes);
+        var expiresAt = DateTime.UtcNow.AddMinutes(configuration.Value.ExpiryMinutes);
 
         var token = await tokenGeneratorService.GenerateTokenAsync(new GenerateTokenRequest(user.Employee!.Id, user.TenantId, user.Email!, user.Employee.Role));
 

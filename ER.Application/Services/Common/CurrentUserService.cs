@@ -5,11 +5,16 @@ using Microsoft.AspNetCore.Http;
 
 namespace ER.Application.Services.Common;
 
+/// <summary>
+/// Reads the authenticated employee, tenant, and role from JWT claims in the current HTTP context.
+/// </summary>
 public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
+    /// <inheritdoc />
     public bool IsAuthenticated =>
         httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true;
 
+    /// <inheritdoc />
     public Guid? EmployeeId
     {
         get
@@ -21,6 +26,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
         }
     }
 
+    /// <inheritdoc />
     public Guid? TenantId
     {
         get
@@ -30,6 +36,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
         }
     }
 
+    /// <inheritdoc />
     public EmployeeRole? Role
     {
         get

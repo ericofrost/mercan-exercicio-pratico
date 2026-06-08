@@ -1,9 +1,12 @@
 ﻿using System.Text;
 using ER.Application.Interfaces.Repositories;
+using ER.Domain.Configuration;
 using ER.Domain.Enums;
+using ER.Domain.Helpers;
 using ER.Domain.Shared;
 using ER.Infrastructure.Context;
 using ER.Infrastructure.Repositories;
+using ER.Infrastructure.Seeds;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,21 +16,41 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ER.Infrastructure.DI;
 
+/// <summary>
+/// Registers infrastructure services, persistence, identity, authentication, and database initialization components.
+/// </summary>
 public static class Setup
 {
+    /// <summary>
+    /// Adds infrastructure services required by the ExpenseReports API.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">Application configuration.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when required JWT configuration such as <c>Jwt:Key</c> is missing.
+    /// </exception>
     public static void ConfigureInfrastructureDependencyInjection(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<DatabaseSettings>(configuration.GetSection(DatabaseSettings.SectionName));
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-        
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        
+        services.AddScoped<SampleDataSeeder>();
+        services.AddScoped<ApplicationDbContextInitializer>();
+
         AddAuthenticationConfiguration(services, configuration);
-        
+
         AddIdentityConfiguration(services);
 
         ConfigureInfrastructureServices(services);
     }
 
+    /// <summary>
+    /// Registers infrastructure-level application service implementations.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
     private static void ConfigureInfrastructureServices(IServiceCollection services)
     {
         services.AddHttpContextAccessor();
@@ -35,6 +58,10 @@ public static class Setup
         services.AddScoped<ITenantRepository, TenantRepository>();
     }
 
+    /// <summary>
+    /// Configures ASP.NET Core Identity password, lockout, and store options.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
     private static void AddIdentityConfiguration(IServiceCollection services)
     {
         services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
@@ -49,12 +76,21 @@ public static class Setup
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
 
-                options.User.RequireUniqueEmail = false; // Uniqueness is per-tenant via UserName pattern
+                options.User.RequireUniqueEmail = false;
+                options.User.AllowedUserNameCharacters = IdentityUserNames.AllowedUserNameCharacters;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
     }
 
+    /// <summary>
+    /// Configures JWT bearer authentication and authorization policies.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">Application configuration.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <c>Jwt:Key</c> is not configured.
+    /// </exception>
     private static void AddAuthenticationConfiguration(IServiceCollection services, IConfiguration configuration)
     {
         var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.");

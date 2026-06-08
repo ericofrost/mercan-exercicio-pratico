@@ -3,8 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ER.Infrastructure.Configurations;
 
+/// <summary>
+/// Fluent API configuration for the <see cref="Expense"/> entity.
+/// </summary>
 public static class ExpenseConfiguration
 {
+    /// <summary>
+    /// Applies expense property constraints, indexes, and relationship mappings.
+    /// </summary>
+    /// <param name="builder">The model builder provided by Entity Framework Core.</param>
     public static void Configure(ModelBuilder builder)
     {
         builder.Entity<Expense>(e =>
