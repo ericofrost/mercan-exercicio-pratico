@@ -1,0 +1,17 @@
+﻿global using ER.Application.Authentication;
+global using ER.Application.DI;
+global using ER.Application.Interfaces.Authentication;
+global using ER.Domain.Enums;
+global using ER.Infrastructure.Context;
+global using ER.Infrastructure.DI;
+global using ER.Infrastructure.Seeds;
+global using ER.WebApi.Configuration;
+global using ER.WebApi.Helpers;
+global using ER.WebApi.Logging;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.Extensions.Diagnostics.HealthChecks;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.OpenApi.Models;
+global using System.Text.Json;

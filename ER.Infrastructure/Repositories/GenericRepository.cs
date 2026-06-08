@@ -1,10 +1,4 @@
-﻿using System.Linq.Expressions;
-using ER.Application.Interfaces.Repositories;
-using ER.Domain.Base;
-using ER.Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
-
-namespace ER.Infrastructure.Repositories;
+﻿namespace ER.Infrastructure.Repositories;
 
 /// <summary>
 /// Generic Entity Framework Core repository providing basic persistence operations for entities derived from <see cref="BaseModel"/>.

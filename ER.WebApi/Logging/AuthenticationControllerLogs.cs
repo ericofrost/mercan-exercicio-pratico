@@ -1,6 +1,3 @@
-using ER.Domain.Enums;
-using Microsoft.Extensions.Logging;
-
 namespace ER.WebApi.Logging;
 
 /// <summary>

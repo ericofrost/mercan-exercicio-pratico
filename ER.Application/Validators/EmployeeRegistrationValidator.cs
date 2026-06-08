@@ -1,15 +1,17 @@
-﻿using ER.Application.Authentication;
-using ER.Application.Interfaces.Repositories;
-using ER.Domain.Models;
-using FluentValidation;
+﻿namespace ER.Application.Validators;
 
-namespace ER.Application.Validators;
-
+/// <summary>
+/// Validates employee registration requests, including tenant existence and email uniqueness within the tenant.
+/// </summary>
 public class EmployeeRegistrationValidator : ServiceValidator<RegisterEmployeeRequest,RegisterEmployeeResult>
 {
     private readonly IGenericRepository<Domain.Models.Employee> _employeeRepository;
     private readonly IGenericRepository<Tenant> _tenantRepository;
     
+    /// <summary>
+    /// Initializes a new instance of the registration validator with repository access from the unit of work.
+    /// </summary>
+    /// <param name="unitOfWork">The unit of work used to resolve tenant and employee repositories.</param>
     public EmployeeRegistrationValidator(IUnitOfWork unitOfWork)
     {
         _employeeRepository = unitOfWork.Repository<Employee>();

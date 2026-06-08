@@ -1,7 +1,4 @@
-using ER.Application.Authentication;
-using ER.Application.Common;
-
-namespace ER.Application.Interfaces.Authentication;
+﻿namespace ER.Application.Interfaces.Authentication;
 
 /// <summary>
 /// Application service contract for registering employees and their linked identity users.
@@ -14,7 +11,8 @@ public interface IEmployeeRegistrationService
     /// <param name="request">The registration request containing tenant, profile, and password data.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>
-    /// A successful <see cref="Result{T}"/> when registration completes; otherwise a failed result describing the validation or identity error.
+    /// A successful <see cref="Result{T}"/> when registration completes; otherwise a failed result with validation,
+    /// identity, service, or unexpected errors.
     /// </returns>
     Task<Result<RegisterEmployeeResult>> RegisterAsync(RegisterEmployeeRequest request, CancellationToken cancellationToken = default);
 }

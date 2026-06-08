@@ -1,7 +1,4 @@
-using ER.Domain.Enums;
-using Microsoft.Extensions.Logging;
-
-namespace ER.Application.Logging;
+﻿namespace ER.Application.Logging;
 
 /// <summary>
 /// Source-generated log definitions for <see cref="Services.Employee.EmployeeRegistrationService"/>.

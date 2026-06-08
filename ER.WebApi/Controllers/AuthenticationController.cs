@@ -1,10 +1,4 @@
-﻿using ER.Application.Authentication;
-using ER.Application.Interfaces.Authentication;
-using ER.WebApi.Logging;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace ER.WebApi.Controllers;
+﻿namespace ER.WebApi.Controllers;
 
 /// <summary>
 /// Exposes anonymous authentication endpoints for login and employee registration.

@@ -1,7 +1,4 @@
-using ER.Domain.Enums;
-using ER.Domain.Models;
-
-namespace ER.Infrastructure.Seeds.Data;
+﻿namespace ER.Infrastructure.Seeds.Data;
 
 /// <summary>
 /// Predefined sample employees, including two employees and one manager per tenant.

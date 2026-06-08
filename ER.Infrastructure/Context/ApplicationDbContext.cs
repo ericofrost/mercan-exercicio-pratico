@@ -1,11 +1,4 @@
-﻿using ER.Domain.Models;
-using ER.Domain.Shared;
-using ER.Infrastructure.Configurations;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-
-namespace ER.Infrastructure.Context;
+﻿namespace ER.Infrastructure.Context;
 
 /// <summary>
 /// Entity Framework Core database context for tenants, employees, expenses, and ASP.NET Identity stores.

@@ -1,8 +1,9 @@
-﻿using System.Linq.Expressions;
-using ER.Domain.Base;
+﻿namespace ER.Application.Interfaces.Repositories;
 
-namespace ER.Application.Interfaces.Repositories;
-
+/// <summary>
+/// Generic persistence contract for entities deriving from <see cref="BaseModel"/>.
+/// </summary>
+/// <typeparam name="T">The entity type.</typeparam>
 public interface IGenericRepository<T> where T : BaseModel
 {
     /// <summary>
@@ -57,12 +58,12 @@ public interface IGenericRepository<T> where T : BaseModel
     Task<(int, IEnumerable<T>)> GetPaginatedListAsync(Expression<Func<T, bool>> filter, string orderBy, string order, int rowsPerPage, int currentPage, CancellationToken cancellationToken = default);
     
     /// <summary>
-    /// Get all entities with query includes and filter, this is used to include child entities
+    /// Retrieves entities matching the filter with optional related entities included.
     /// </summary>
-    /// <param name="collectionSearch"></param>
+    /// <param name="collectionSearch">Pagination and sorting parameters for the query.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <param name="include">Optional expressions to include related entity</param>
+    /// <param name="include">Optional expression to include related entities.</param>
     /// <param name="predicate">A LINQ expression to filter the entities.</param>
-    /// <returns></returns>
+    /// <returns>The matching entities for the requested page.</returns>
     //Task<IEnumerable<T>> GetWithFilterPaginationAndIncludesAsync(RequestResponse collectionSearch, Func<IQueryable<T>, IQueryable<T>>? include = null, Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default);
 }

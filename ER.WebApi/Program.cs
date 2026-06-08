@@ -1,12 +1,4 @@
-using ER.Application.DI;
-using ER.Infrastructure.DI;
-using ER.Infrastructure.Seeds;
-using ER.WebApi.Configuration;
-using ER.WebApi.Helpers;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 

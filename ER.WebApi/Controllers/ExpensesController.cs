@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace ER.WebApi.Controllers;
+﻿namespace ER.WebApi.Controllers;
 
 /// <summary>
 /// Expense endpoints (not yet implemented).

@@ -1,10 +1,4 @@
-﻿using ER.Application.Interfaces.Repositories;
-using ER.Domain.Base;
-using ER.Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-
-namespace ER.Infrastructure.Repositories;
+﻿namespace ER.Infrastructure.Repositories;
 
 /// <summary>
 /// Coordinates repositories, save changes, and database transactions for a single request scope.

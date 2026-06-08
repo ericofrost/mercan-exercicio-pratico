@@ -1,6 +1,4 @@
-using ER.Domain.Enums;
-
-namespace ER.Application.Authentication;
+﻿namespace ER.Application.Authentication;
 
 /// <summary>
 /// Read model containing the account data required for authentication and token issuance.

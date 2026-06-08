@@ -1,8 +1,8 @@
-﻿using ER.Application.Common.Pagination;
-using FluentValidation;
+﻿namespace ER.Application.Validators;
 
-namespace ER.Application.Validators;
-
+/// <summary>
+/// Validates paging bounds for <see cref="PaginationQuery"/> requests.
+/// </summary>
 public class PaginationValidator : AbstractValidator<PaginationQuery>
 {
     public PaginationValidator()

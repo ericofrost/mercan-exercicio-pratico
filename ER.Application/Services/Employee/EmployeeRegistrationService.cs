@@ -1,19 +1,8 @@
-﻿using ER.Application.Authentication;
-using ER.Application.Common;
-using ER.Application.Interfaces.Authentication;
-using ER.Application.Interfaces.Repositories;
-using ER.Application.Interfaces.Validators;
-using ER.Application.Logging;
-using ER.Domain.Models;
-using ER.Domain.Shared;
-using ER.Domain.Specifications;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-
-namespace ER.Application.Services.Employee;
+﻿namespace ER.Application.Services.Employee;
 
 /// <summary>
 /// Registers employees and linked identity users atomically within a tenant using a unit-of-work transaction.
+/// Tenant and email checks run through <see cref="Validators.EmployeeRegistrationValidator"/> before the transaction starts.
 /// </summary>
 public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IServiceValidator<RegisterEmployeeRequest,RegisterEmployeeResult> validator, ILogger<EmployeeRegistrationService> logger) : IEmployeeRegistrationService
 {
@@ -23,9 +12,6 @@ public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<App
     /// <inheritdoc />
     /// <exception cref="InvalidOperationException">
     /// Thrown by the unit of work when transaction state is invalid.
-    /// </exception>
-    /// <exception cref="Exception">
-    /// Rethrows unexpected persistence or identity exceptions after rolling back the active transaction.
     /// </exception>
     public async Task<Result<RegisterEmployeeResult>> RegisterAsync(RegisterEmployeeRequest request, CancellationToken cancellationToken = default)
     {
@@ -58,7 +44,7 @@ public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<App
                 
                 EmployeeRegistrationServiceLogs.IdentityUserCreationFailed(logger, request.TenantId, errorCodes);
                 
-                result.SetError("Email already registered for this tenant.", ErrorType.Service);
+                result.SetError("User creation failed.", ErrorType.Service);
                 
                 return result;
             }

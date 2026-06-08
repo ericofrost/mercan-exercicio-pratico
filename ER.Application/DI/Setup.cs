@@ -1,16 +1,4 @@
-﻿using ER.Application.Authentication;
-using ER.Application.Common.Pagination;
-using ER.Application.Interfaces.Authentication;
-using ER.Application.Interfaces.Validators;
-using ER.Application.Services.Authentication;
-using ER.Application.Services.Common;
-using ER.Application.Services.Employee;
-using ER.Application.Validators;
-using FluentValidation;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace ER.Application.DI;
+﻿namespace ER.Application.DI;
 
 /// <summary>
 /// Registers application-layer services in the dependency injection container.
@@ -18,7 +6,7 @@ namespace ER.Application.DI;
 public static class Setup
 {
     /// <summary>
-    /// Adds application services required by the ExpenseReports API.
+    /// Adds application services, validators, and related dependencies required by the ExpenseReports API.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
     /// <param name="configuration">Application configuration.</param>

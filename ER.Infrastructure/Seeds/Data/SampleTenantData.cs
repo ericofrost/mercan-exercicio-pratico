@@ -1,6 +1,4 @@
-using ER.Domain.Models;
-
-namespace ER.Infrastructure.Seeds.Data;
+﻿namespace ER.Infrastructure.Seeds.Data;
 
 /// <summary>
 /// Predefined sample tenants used by development seeding.

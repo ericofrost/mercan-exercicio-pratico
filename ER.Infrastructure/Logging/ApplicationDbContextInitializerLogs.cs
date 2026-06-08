@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Logging;
-
-namespace ER.Infrastructure.Logging;
+﻿namespace ER.Infrastructure.Logging;
 
 /// <summary>
 /// Source-generated log definitions for <see cref="Seeds.ApplicationDbContextInitializer"/>.

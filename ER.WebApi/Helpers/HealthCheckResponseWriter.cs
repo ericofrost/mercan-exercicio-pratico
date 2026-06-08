@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
-namespace ER.WebApi.Helpers;
+﻿namespace ER.WebApi.Helpers;
 
 /// <summary>
 /// Writes health check results as JSON for probe and diagnostic use.

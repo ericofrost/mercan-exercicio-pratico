@@ -1,16 +1,4 @@
-﻿using ER.Application.Authentication;
-using ER.Application.Common;
-using ER.Application.Interfaces.Authentication;
-using ER.Application.Interfaces.Validators;
-using ER.Application.Logging;
-using ER.Domain.Configuration;
-using ER.Domain.Shared;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
-namespace ER.Application.Services.Authentication;
+﻿namespace ER.Application.Services.Authentication;
 
 /// <summary>
 /// Validates tenant-scoped credentials through ASP.NET Identity and issues JWT access tokens for authenticated employees.
@@ -61,7 +49,7 @@ public class AuthenticationService(UserManager<ApplicationUser> userManager, ITo
 
     private async Task CheckUserPassword(ApplicationUser? user, LoginRequest request, Result<LoginResponse> result, CancellationToken cancellationToken = default)
     {
-        if (user is not null && await userManager.CheckPasswordAsync(user!, request.Password))
+        if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
         {
             AuthenticationServiceLogs.LoginFailed(logger, request.TenantId);
             

@@ -1,14 +1,4 @@
-using ER.Domain.Models;
-using ER.Domain.Shared;
-using ER.Domain.Specifications;
-using ER.Infrastructure.Context;
-using ER.Infrastructure.Logging;
-using ER.Infrastructure.Seeds.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-
-namespace ER.Infrastructure.Seeds;
+﻿namespace ER.Infrastructure.Seeds;
 
 /// <summary>
 /// Seeds sample tenants, employees, and identity users for local development and integration testing.

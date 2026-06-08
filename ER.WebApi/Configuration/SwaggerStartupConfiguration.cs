@@ -1,6 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
-
-namespace ER.WebApi.Configuration;
+﻿namespace ER.WebApi.Configuration;
 
 /// <summary>
 /// Configures Swagger/OpenAPI generation and JWT bearer security definitions for the API.

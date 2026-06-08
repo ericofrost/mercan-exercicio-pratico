@@ -1,20 +1,4 @@
-﻿using System.Text;
-using ER.Application.Interfaces.Repositories;
-using ER.Domain.Configuration;
-using ER.Domain.Enums;
-using ER.Domain.Helpers;
-using ER.Domain.Shared;
-using ER.Infrastructure.Context;
-using ER.Infrastructure.Repositories;
-using ER.Infrastructure.Seeds;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-
-namespace ER.Infrastructure.DI;
+﻿namespace ER.Infrastructure.DI;
 
 /// <summary>
 /// Registers infrastructure services, persistence, identity, authentication, and database initialization components.

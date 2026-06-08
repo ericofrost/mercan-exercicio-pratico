@@ -1,12 +1,4 @@
-using ER.Domain.Configuration;
-using ER.Infrastructure.Context;
-using ER.Infrastructure.Logging;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
-namespace ER.Infrastructure.Seeds;
+﻿namespace ER.Infrastructure.Seeds;
 
 /// <summary>
 /// Applies database migrations and optional sample seed data during application startup.

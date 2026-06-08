@@ -1,6 +1,4 @@
-using ER.Domain.Enums;
-
-namespace ER.Application.Interfaces.Authentication;
+﻿namespace ER.Application.Interfaces.Authentication;
 
 /// <summary>
 /// Provides access to the authenticated user's identity context extracted from the current HTTP request JWT.
@@ -8,7 +6,8 @@ namespace ER.Application.Interfaces.Authentication;
 public interface ICurrentUserService
 {
     /// <summary>
-    /// Identifier of the authenticated employee extracted from the JWT <c>sub</c> claim.
+    /// Identifier of the authenticated employee extracted from the JWT
+    /// <see cref="ClaimTypes.NameIdentifier"/> or <c>sub</c> claim.
     /// </summary>
     Guid? EmployeeId { get; }
 

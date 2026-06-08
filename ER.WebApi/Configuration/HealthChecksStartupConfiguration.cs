@@ -1,9 +1,4 @@
-﻿using ER.Infrastructure.Context;
-using ER.WebApi.Helpers;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
-namespace ER.WebApi.Configuration;
+﻿namespace ER.WebApi.Configuration;
 
 /// <summary>
 /// Registers health check services for the ExpenseReports API.

@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Logging;
-
-namespace ER.Application.Logging;
+﻿namespace ER.Application.Logging;
 
 /// <summary>
 /// Source-generated log definitions for <see cref="Services.Authentication.JwtTokenGeneratorService"/>.

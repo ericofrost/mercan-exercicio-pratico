@@ -1,6 +1,4 @@
-using ER.Domain.Enums;
-
-namespace ER.Application.Authentication;
+﻿namespace ER.Application.Authentication;
 
 /// <summary>
 /// Request payload for registering a new employee and linked identity user within a tenant.

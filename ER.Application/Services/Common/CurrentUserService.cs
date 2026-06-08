@@ -1,9 +1,4 @@
-﻿using System.Security.Claims;
-using ER.Application.Interfaces.Authentication;
-using ER.Domain.Enums;
-using Microsoft.AspNetCore.Http;
-
-namespace ER.Application.Services.Common;
+﻿namespace ER.Application.Services.Common;
 
 /// <summary>
 /// Reads the authenticated employee, tenant, and role from JWT claims in the current HTTP context.

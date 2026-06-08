@@ -1,7 +1,4 @@
-﻿using ER.Domain.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace ER.Infrastructure.Configurations;
+﻿namespace ER.Infrastructure.Configurations;
 
 /// <summary>
 /// Fluent API configuration for the <see cref="Tenant"/> entity.

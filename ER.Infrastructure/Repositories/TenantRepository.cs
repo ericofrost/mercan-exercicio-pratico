@@ -1,8 +1,4 @@
-using ER.Application.Interfaces.Repositories;
-using ER.Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
-
-namespace ER.Infrastructure.Repositories;
+﻿namespace ER.Infrastructure.Repositories;
 
 /// <summary>
 /// Entity Framework Core implementation of tenant existence queries.
