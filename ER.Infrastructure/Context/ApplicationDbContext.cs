@@ -1,6 +1,6 @@
 ﻿using ER.Domain.Models;
+using ER.Domain.Shared;
 using ER.Infrastructure.Configurations;
-using ER.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +24,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         ApplicationUserConfiguration.Configure(builder);
         EmployeeConfiguration.Configure(builder);
-        TentantConfiguration.Configure(builder);
+        TenantConfiguration.Configure(builder);
         ExpenseConfiguration.Configure(builder);
     }
 }

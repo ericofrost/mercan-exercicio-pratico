@@ -1,17 +1,10 @@
-﻿using ER.Domain.Enums;
-
-namespace ER.Domain.Models;
+﻿namespace ER.Domain.Models;
 
 /// <summary>
 /// Expense submitted by an employee for approval within a tenant.
 /// </summary>
-public class Expense
+public class Expense : BaseModel
 {
-    /// <summary>
-    /// Unique identifier of the expense.
-    /// </summary>
-    public Guid Id { get; set; }
-
     /// <summary>
     /// Foreign key to the tenant this expense belongs to.
     /// </summary>
@@ -86,4 +79,27 @@ public class Expense
     /// Navigation property to the manager who approved or rejected the expense.
     /// </summary>
     public Employee? DecidedBy { get; set; }
+
+    public static Expense Create(ExpenseSpecification specification)
+    {
+        return new Expense
+        {
+            Id = Guid.NewGuid(),
+            TenantId = specification.TenantId,
+            EmployeeId = specification.EmployeeId,
+            Amount = specification.Amount,
+            Currency = specification.Currency,
+            Category = specification.Category,
+            Description = specification.Description,
+            ExpenseDate = specification.ExpenseDate,
+            Status = specification.Status,
+            SubmittedAt = specification.SubmittedAt,
+            DecidedAt = specification.DecidedAt,
+            DecidedByEmployeeId = specification.DecidedByEmployeeId,
+            RejectionReason = specification.RejectionReason,
+            Tenant = specification.Tenant!,
+            Employee = specification.Employee!,
+            DecidedBy = specification.DecidedBy
+        };
+    }
 }

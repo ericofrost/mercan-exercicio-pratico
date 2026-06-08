@@ -1,7 +1,4 @@
-﻿using ER.Domain.Base;
-using ER.Domain.Enums;
-
-namespace ER.Domain.Models;
+﻿namespace ER.Domain.Models;
 
 /// <summary>
 /// Represents an employee belonging to a tenant (company).
@@ -26,10 +23,23 @@ public class Employee : Model
     /// <summary>
     /// Navigation property to the tenant (company) this employee belongs to.
     /// </summary>
-    public Tenant Tenant { get; set; } = null!;
+    public Tenant? Tenant { get; set; }
 
     /// <summary>
     /// Expenses submitted by this employee.
     /// </summary>
-    public ICollection<Expense> Expenses { get; set; } = [];
+    public ICollection<Expense>? Expenses { get; set; }
+
+    public static Employee Create(EmployeeSpecification specification)
+    {
+        return new Employee
+        {
+            Id =  Guid.NewGuid(),
+            Name =  specification.Name,
+            Email = specification.Email,
+            Role = specification.Role,
+            TenantId = specification.TenantId,
+            Expenses = specification.Expenses?.ToList()
+        };
+    }
 }

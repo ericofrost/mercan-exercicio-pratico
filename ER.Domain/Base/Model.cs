@@ -3,13 +3,8 @@
 /// <summary>
 /// Base class for all domain models with common properties.
 /// </summary>
-public class Model
+public class Model : BaseModel
 {
-    /// <summary>
-    /// The id
-    /// </summary>
-    public Guid Id { get; set; }
-    
     /// <summary>
     /// The name
     /// </summary>

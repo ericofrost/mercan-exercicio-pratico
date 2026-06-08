@@ -1,9 +1,9 @@
-﻿using ER.Infrastructure.Identity;
+﻿using ER.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace ER.Infrastructure.Configurations;
 
-public class ApplicationUserConfiguration
+public static class ApplicationUserConfiguration
 {
     public static void Configure(ModelBuilder builder)
     {

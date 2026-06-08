@@ -1,0 +1,68 @@
+﻿using System.Linq.Expressions;
+using ER.Domain.Base;
+
+namespace ER.Application.Interfaces.Repositories;
+
+public interface IGenericRepository<T> where T : BaseModel
+{
+    /// <summary>
+    /// Adds a new entity to the repository.
+    /// </summary>
+    /// <param name="entity">The entity to add.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    Task AddAsync(T entity, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Retrieves all entities of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A collection of all entities.</returns>
+    Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Checks if any entities of type <typeparamref name="T"/> exist in the database 
+    /// that satisfy the given filter criteria, with optional related entities included.
+    /// </summary>
+    /// <param name="filter">An expression to filter the entities of type <typeparamref name="T"/>.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <param name="includes">Optional expressions to include related entities (e.g., for eager loading).</param>
+    /// <returns>
+    /// A <see cref="Task{TResult}"/> that resolves to <c>true</c> if any entity matching the filter exists; 
+    /// otherwise, <c>false</c>.
+    /// </returns>
+    Task<bool> ExistsWithFilterAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes);
+
+    /// <summary>
+    /// Checks if any entities of type <typeparamref name="T"/> exist in the database 
+    /// that satisfy the given filter criteria, with optional related entities included.
+    /// </summary>
+    /// <param name="filter">An expression to filter the entities of type <typeparamref name="T"/>.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// A <see cref="Task{TResult}"/> that resolves to <c>true</c> if any entity matching the filter exists; 
+    /// otherwise, <c>false</c>.
+    /// </returns>
+    Task<bool> ExistsWithFilterAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Retrieves a paginated list of entities based on the provided filter and sorting criteria, along with the total count of records.
+    /// </summary>
+    /// <param name="filter">A LINQ expression to filter the entities.</param>
+    /// <param name="orderBy">The property to order the results by.</param>
+    /// <param name="order">The sorting direction, either "asc" for ascending or "desc" for descending order.</param>
+    /// <param name="rowsPerPage">The number of rows to return per page.</param>
+    /// <param name="currentPage">The current page number to retrieve.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A tuple containing the total count of matching records and a paginated collection of entities.</returns>
+    Task<(int, IEnumerable<T>)> GetPaginatedListAsync(Expression<Func<T, bool>> filter, string orderBy, string order, int rowsPerPage, int currentPage, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get all entities with query includes and filter, this is used to include child entities
+    /// </summary>
+    /// <param name="collectionSearch"></param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <param name="include">Optional expressions to include related entity</param>
+    /// <param name="predicate">A LINQ expression to filter the entities.</param>
+    /// <returns></returns>
+    //Task<IEnumerable<T>> GetWithFilterPaginationAndIncludesAsync(RequestResponse collectionSearch, Func<IQueryable<T>, IQueryable<T>>? include = null, Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default);
+}

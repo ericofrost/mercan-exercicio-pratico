@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ER.Infrastructure.Configurations;
 
-public class ExpenseConfiguration
+public static class ExpenseConfiguration
 {
     public static void Configure(ModelBuilder builder)
     {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ER.Infrastructure.Configurations;
 
-public static class TentantConfiguration
+public static class TenantConfiguration
 {
     public static void Configure(ModelBuilder builder)
     {

@@ -13,7 +13,7 @@ public static class EmployeeConfiguration
             e.HasIndex(x => new { x.TenantId, x.Email }).IsUnique();
 
             e.HasOne(x => x.Tenant)
-                .WithMany()
+                .WithMany(t => t.Employees)
                 .HasForeignKey(x => x.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
