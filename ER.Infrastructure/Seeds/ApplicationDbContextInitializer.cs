@@ -130,14 +130,12 @@ public class ApplicationDbContextInitializer(ApplicationDbContext context, IOpti
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when application tables have been dropped.</returns>
-    private async Task DropApplicationTablesAsync(CancellationToken cancellationToken) =>
-        await DropApplicationTablesAsync(context, cancellationToken);
+    private async Task DropApplicationTablesAsync(CancellationToken cancellationToken) => await DropApplicationTablesAsync(context, cancellationToken);
 
     /// <summary>
     /// Applies all pending Entity Framework Core migrations.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when migrations have been applied.</returns>
-    private async Task ApplyMigrationsAsync(CancellationToken cancellationToken) =>
-        await context.Database.MigrateAsync(cancellationToken);
+    private async Task ApplyMigrationsAsync(CancellationToken cancellationToken) => await context.Database.MigrateAsync(cancellationToken);
 }
