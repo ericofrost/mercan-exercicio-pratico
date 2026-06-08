@@ -1,5 +1,6 @@
 using ER.Domain.Configuration;
 using ER.Infrastructure.Context;
+using ER.Infrastructure.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,12 @@ namespace ER.Infrastructure.Seeds;
 /// <summary>
 /// Applies database migrations and optional sample seed data during application startup.
 /// </summary>
-public class ApplicationDbContextInitializer(ApplicationDbContext context, IOptions<DatabaseSettings> databaseSettings, IHostEnvironment environment, SampleDataSeeder sampleDataSeeder, ILogger<ApplicationDbContextInitializer> logger)
+public class ApplicationDbContextInitializer(
+    ApplicationDbContext context,
+    IOptions<DatabaseSettings> databaseSettings,
+    IHostEnvironment environment,
+    SampleDataSeeder sampleDataSeeder,
+    ILogger<ApplicationDbContextInitializer> logger)
 {
     /// <summary>
     /// Application tables in dependency order (dependents first) so drops succeed without orphan FK violations.
@@ -48,18 +54,23 @@ public class ApplicationDbContextInitializer(ApplicationDbContext context, IOpti
         try
         {
             if (await ShouldDropTablesAsync(cancellationToken))
+            {
+                ApplicationDbContextInitializerLogs.DroppingApplicationTables(logger);
                 await DropApplicationTablesAsync(cancellationToken);
+            }
 
             await ApplyMigrationsAsync(cancellationToken);
+            ApplicationDbContextInitializerLogs.MigrationsApplied(logger);
 
             if (databaseSettings.Value.SeedSampleData)
                 await sampleDataSeeder.SeedAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
+            ApplicationDbContextInitializerLogs.InitializationCompleted(logger);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Database initialization failed.");
+            ApplicationDbContextInitializerLogs.InitializationFailed(logger, ex, "InitializeAsync");
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }

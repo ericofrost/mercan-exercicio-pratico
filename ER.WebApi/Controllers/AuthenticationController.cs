@@ -1,5 +1,6 @@
 ﻿using ER.Application.Authentication;
 using ER.Application.Interfaces.Authentication;
+using ER.WebApi.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,10 @@ namespace ER.WebApi.Controllers;
 [ApiController]
 [Route("api/auth")]
 [AllowAnonymous]
-public class AuthenticationController(IAuthenticationService authenticationService, IEmployeeRegistrationService registrationService) : ControllerBase
+public class AuthenticationController(
+    IAuthenticationService authenticationService,
+    IEmployeeRegistrationService registrationService,
+    ILogger<AuthenticationController> logger) : ControllerBase
 {
     /// <summary>
     /// Authenticates an employee within a tenant and returns a JWT access token.
@@ -25,9 +29,18 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
+        AuthenticationControllerLogs.LoginStarted(logger, request.TenantId);
+
         var result = await authenticationService.LoginAsync(request, cancellationToken);
 
-        return result.IsSuccess ? Ok(result.Value) : Unauthorized(new { message = result.Error });
+        if (result.IsFailure)
+        {
+            AuthenticationControllerLogs.LoginRejected(logger, request.TenantId);
+            return Unauthorized(new { message = result.Error });
+        }
+
+        AuthenticationControllerLogs.LoginCompleted(logger, request.TenantId);
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -42,13 +55,17 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterEmployeeRequest request, CancellationToken cancellationToken)
     {
+        AuthenticationControllerLogs.RegistrationStarted(logger, request.TenantId, request.Role);
+
         var result = await registrationService.RegisterAsync(request, cancellationToken);
 
         if (result.IsFailure)
         {
+            AuthenticationControllerLogs.RegistrationRejected(logger, request.TenantId);
             return BadRequest(new { message = result.Error });
         }
 
+        AuthenticationControllerLogs.RegistrationCompleted(logger, request.TenantId, result.Value!.EmployeeId, result.Value.UserId);
         return CreatedAtAction(nameof(Login), result.Value);
     }
 }

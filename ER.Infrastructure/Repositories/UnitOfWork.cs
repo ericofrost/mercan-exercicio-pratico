@@ -26,7 +26,7 @@ public class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork
 
         if (_repositories.TryGetValue(type, out var value)) return (IGenericRepository<T>)value;
 
-        var repositoryType = typeof(IGenericRepository<>).MakeGenericType(type);
+        var repositoryType = typeof(GenericRepository<>).MakeGenericType(type);
         var repositoryInstance = Activator.CreateInstance(repositoryType, _dbContext);
         value = repositoryInstance;
 

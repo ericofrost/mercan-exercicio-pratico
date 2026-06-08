@@ -2,6 +2,7 @@ using ER.Domain.Models;
 using ER.Domain.Shared;
 using ER.Domain.Specifications;
 using ER.Infrastructure.Context;
+using ER.Infrastructure.Logging;
 using ER.Infrastructure.Seeds.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ public class SampleDataSeeder(ApplicationDbContext context, UserManager<Applicat
     {
         if (await IsSampleDataPresentAsync(cancellationToken))
         {
-            logger.LogInformation("Sample data already present. Skipping seed.");
+            SampleDataSeederLogs.SampleDataAlreadyPresent(logger);
             return;
         }
 
@@ -34,7 +35,7 @@ public class SampleDataSeeder(ApplicationDbContext context, UserManager<Applicat
         await SeedEmployeesAsync(cancellationToken);
         await SeedUsersAsync(cancellationToken);
 
-        logger.LogInformation("Sample data seeded successfully.");
+        SampleDataSeederLogs.SampleDataSeeded(logger);
     }
 
     /// <summary>
@@ -91,9 +92,10 @@ public class SampleDataSeeder(ApplicationDbContext context, UserManager<Applicat
 
             if (createResult.Succeeded) continue;
 
-            var errors = string.Join(", ", createResult.Errors.Select(error => error.Description));
+            var errorCodes = string.Join(", ", createResult.Errors.Select(error => error.Code));
+            SampleDataSeederLogs.UserSeedFailed(logger, employeeSeed.Id, errorCodes);
 
-            throw new InvalidOperationException($"Failed to seed user '{employeeSeed.Email}': {errors}");
+            throw new InvalidOperationException($"Failed to seed user for employee '{employeeSeed.Id}': {errorCodes}");
         }
 
         await context.SaveChangesAsync(cancellationToken);
