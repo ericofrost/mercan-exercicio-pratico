@@ -1,6 +1,7 @@
 ﻿using ER.Application.Authentication;
 using ER.Application.Common;
 using ER.Application.Interfaces.Authentication;
+using ER.Application.Interfaces.Validators;
 using ER.Application.Logging;
 using ER.Domain.Configuration;
 using ER.Domain.Shared;
@@ -14,37 +15,73 @@ namespace ER.Application.Services.Authentication;
 /// <summary>
 /// Validates tenant-scoped credentials through ASP.NET Identity and issues JWT access tokens for authenticated employees.
 /// </summary>
-public class AuthenticationService(
-    UserManager<ApplicationUser> userManager,
-    ITokenGeneratorService tokenGeneratorService,
-    IOptions<JwtSettings> configuration,
-    ILogger<AuthenticationService> logger) : IAuthenticationService
+public class AuthenticationService(UserManager<ApplicationUser> userManager, ITokenGeneratorService tokenGeneratorService, IServiceValidator<LoginRequest,LoginResponse>  loginRequestValidator, IOptions<JwtSettings> configuration, ILogger<AuthenticationService> logger) : IAuthenticationService
 {
     private const string InvalidCredentialsMessage = "Invalid credentials.";
 
     /// <inheritdoc />
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await userManager.Users.Include(u => u.Employee).FirstOrDefaultAsync(
-            u => u.TenantId == request.TenantId && u.Email == request.Email && u.Employee!.IsActive, cancellationToken);
+        var result = Result<LoginResponse>.Create();
 
-        if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
+        try
+        {
+            if (!await loginRequestValidator.SetValidationResultAsync(result, request, cancellationToken))
+            {
+                return result;
+            }
+        
+            var user = await GetUserAsync(request, cancellationToken);
+
+            await CheckUserPassword(user, request, result, cancellationToken);
+
+            if (!result.Success) return result;
+        
+            var expiresAt = DateTime.UtcNow.AddMinutes(configuration.Value.ExpiryMinutes);
+
+            var token = await tokenGeneratorService.GenerateTokenAsync(new GenerateTokenRequest(user!.Employee!.Id, user.TenantId, user.Email!, user.Employee.Role));
+            
+            CheckToken(token, user, request, result);
+            
+            if (!result.Success) return result;
+        
+            AuthenticationServiceLogs.LoginSucceeded(logger, request.TenantId, user!.Employee!.Id);
+
+            result.SetData(new LoginResponse(token!, expiresAt));
+        }
+        catch (Exception e)
         {
             AuthenticationServiceLogs.LoginFailed(logger, request.TenantId);
-            return Result<LoginResponse>.Failure(InvalidCredentialsMessage);
+            
+            result.SetError(e.Message, ErrorType.Exception);
         }
 
-        var expiresAt = DateTime.UtcNow.AddMinutes(configuration.Value.ExpiryMinutes);
+        return result;
+    }
 
-        var token = await tokenGeneratorService.GenerateTokenAsync(new GenerateTokenRequest(user.Employee!.Id, user.TenantId, user.Email!, user.Employee.Role));
-
-        if (string.IsNullOrEmpty(token))
+    private async Task CheckUserPassword(ApplicationUser? user, LoginRequest request, Result<LoginResponse> result, CancellationToken cancellationToken = default)
+    {
+        if (user is not null && await userManager.CheckPasswordAsync(user!, request.Password))
         {
-            AuthenticationServiceLogs.TokenGenerationEmpty(logger, request.TenantId, user.Employee.Id);
-            return Result<LoginResponse>.Failure(InvalidCredentialsMessage);
+            AuthenticationServiceLogs.LoginFailed(logger, request.TenantId);
+            
+            result.SetError(InvalidCredentialsMessage, ErrorType.Service);
         }
+    }
+    
+    private void CheckToken(string? token, ApplicationUser user, LoginRequest request, Result<LoginResponse> result)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            AuthenticationServiceLogs.TokenGenerationEmpty(logger, request.TenantId, user.Employee!.Id);
+            
+            result.SetError(InvalidCredentialsMessage, ErrorType.Service);
+        }
+    }
 
-        AuthenticationServiceLogs.LoginSucceeded(logger, request.TenantId, user.Employee.Id);
-        return Result<LoginResponse>.Success(new LoginResponse(token, expiresAt));
+    private async Task<ApplicationUser?> GetUserAsync(LoginRequest request, CancellationToken cancellationToken = default)
+    {
+        return await userManager.Users.Include(u => u.Employee).FirstOrDefaultAsync(
+            u => u.TenantId == request.TenantId && u.Email == request.Email && u.Employee!.IsActive, cancellationToken);
     }
 }

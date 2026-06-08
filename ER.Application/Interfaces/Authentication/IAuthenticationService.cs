@@ -14,7 +14,7 @@ public interface IAuthenticationService
     /// <param name="request">The login request containing tenant, email, and password.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>
-    /// A successful <see cref="Result{LoginResponse}"/> when credentials are valid; otherwise a failed result with a generic error message.
+    /// A successful <see cref="Result{T}"/> when credentials are valid; otherwise a failed result with a generic error message.
     /// </returns>
     Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
 }

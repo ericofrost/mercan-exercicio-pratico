@@ -12,10 +12,7 @@ namespace ER.WebApi.Controllers;
 [ApiController]
 [Route("api/auth")]
 [AllowAnonymous]
-public class AuthenticationController(
-    IAuthenticationService authenticationService,
-    IEmployeeRegistrationService registrationService,
-    ILogger<AuthenticationController> logger) : ControllerBase
+public class AuthenticationController(IAuthenticationService authenticationService, IEmployeeRegistrationService registrationService, ILogger<AuthenticationController> logger) : ControllerBase
 {
     /// <summary>
     /// Authenticates an employee within a tenant and returns a JWT access token.
@@ -33,14 +30,16 @@ public class AuthenticationController(
 
         var result = await authenticationService.LoginAsync(request, cancellationToken);
 
-        if (result.IsFailure)
+        if (!result.Success)
         {
             AuthenticationControllerLogs.LoginRejected(logger, request.TenantId);
+            
             return Unauthorized(new { message = result.Error });
         }
 
         AuthenticationControllerLogs.LoginCompleted(logger, request.TenantId);
-        return Ok(result.Value);
+        
+        return Ok(result.Data);
     }
 
     /// <summary>
@@ -59,13 +58,15 @@ public class AuthenticationController(
 
         var result = await registrationService.RegisterAsync(request, cancellationToken);
 
-        if (result.IsFailure)
+        if (!result.Success)
         {
             AuthenticationControllerLogs.RegistrationRejected(logger, request.TenantId);
+            
             return BadRequest(new { message = result.Error });
         }
 
-        AuthenticationControllerLogs.RegistrationCompleted(logger, request.TenantId, result.Value!.EmployeeId, result.Value.UserId);
-        return CreatedAtAction(nameof(Login), result.Value);
+        AuthenticationControllerLogs.RegistrationCompleted(logger, request.TenantId, result.Data!.EmployeeId, result.Data.UserId);
+        
+        return CreatedAtAction(nameof(Login), result.Data);
     }
 }

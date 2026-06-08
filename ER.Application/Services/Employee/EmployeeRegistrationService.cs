@@ -2,6 +2,7 @@
 using ER.Application.Common;
 using ER.Application.Interfaces.Authentication;
 using ER.Application.Interfaces.Repositories;
+using ER.Application.Interfaces.Validators;
 using ER.Application.Logging;
 using ER.Domain.Models;
 using ER.Domain.Shared;
@@ -14,10 +15,7 @@ namespace ER.Application.Services.Employee;
 /// <summary>
 /// Registers employees and linked identity users atomically within a tenant using a unit-of-work transaction.
 /// </summary>
-public class EmployeeRegistrationService(
-    IUnitOfWork unitOfWork,
-    UserManager<ApplicationUser> userManager,
-    ILogger<EmployeeRegistrationService> logger) : IEmployeeRegistrationService
+public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IServiceValidator<RegisterEmployeeRequest,RegisterEmployeeResult> validator, ILogger<EmployeeRegistrationService> logger) : IEmployeeRegistrationService
 {
     private readonly IGenericRepository<Domain.Models.Employee> _employeeRepository = unitOfWork.Repository<Domain.Models.Employee>();
     private readonly IGenericRepository<Tenant> _tenantRepository = unitOfWork.Repository<Tenant>();
@@ -31,20 +29,11 @@ public class EmployeeRegistrationService(
     /// </exception>
     public async Task<Result<RegisterEmployeeResult>> RegisterAsync(RegisterEmployeeRequest request, CancellationToken cancellationToken = default)
     {
-        var tenantExists = await _tenantRepository.ExistsWithFilterAsync(t => t.Id == request.TenantId && t.IsActive, cancellationToken);
+        var result = Result<RegisterEmployeeResult>.Create();
 
-        if (!tenantExists)
+        if (!await validator.SetValidationResultAsync(result, request, cancellationToken))
         {
-            EmployeeRegistrationServiceLogs.TenantNotFoundOrInactive(logger, request.TenantId);
-            return Result<RegisterEmployeeResult>.Failure("Tenant not found or inactive.");
-        }
-
-        var emailTaken = await _employeeRepository.ExistsWithFilterAsync(e => e.TenantId == request.TenantId && e.Email == request.Email, cancellationToken);
-
-        if (emailTaken)
-        {
-            EmployeeRegistrationServiceLogs.EmailAlreadyRegistered(logger, request.TenantId);
-            return Result<RegisterEmployeeResult>.Failure("Email already registered for this tenant.");
+            return result;
         }
 
         await unitOfWork.BeginTransactionAsync();
@@ -66,21 +55,29 @@ public class EmployeeRegistrationService(
                 await unitOfWork.RollbackTransactionAsync();
 
                 var errorCodes = string.Join(", ", createResult.Errors.Select(e => e.Code));
+                
                 EmployeeRegistrationServiceLogs.IdentityUserCreationFailed(logger, request.TenantId, errorCodes);
-
-                return Result<RegisterEmployeeResult>.Failure("User creation failed.");
+                
+                result.SetError("Email already registered for this tenant.", ErrorType.Service);
+                
+                return result;
             }
 
             await unitOfWork.CommitTransactionAsync();
 
             EmployeeRegistrationServiceLogs.RegistrationSucceeded(logger, request.TenantId, employee.Id, user.Id, request.Role);
-            return Result<RegisterEmployeeResult>.Success(new RegisterEmployeeResult(employee.Id, user.Id));
+            
+            result.SetData(new RegisterEmployeeResult(employee.Id, user.Id));
         }
         catch (Exception ex)
         {
             await unitOfWork.RollbackTransactionAsync();
+            
             EmployeeRegistrationServiceLogs.RegistrationFailedUnexpectedly(logger, ex, request.TenantId);
-            throw;
+            
+            result.SetError(ex.Message, ErrorType.Exception);
         }
+        
+        return result;
     }
 }

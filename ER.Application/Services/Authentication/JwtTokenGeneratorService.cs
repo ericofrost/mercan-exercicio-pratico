@@ -68,7 +68,8 @@ public class JwtTokenGeneratorService : ITokenGeneratorService
         catch (Exception ex)
         {
             JwtTokenGeneratorServiceLogs.JwtConfigurationInvalid(_logger, ex);
-            return null;
+
+            throw;
         }
     }
 }
