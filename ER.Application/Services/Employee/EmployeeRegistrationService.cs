@@ -62,7 +62,7 @@ public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<App
             
             ApplicationLogs.OperationFailedUnexpectedly(logger, ex, ctx, request.TenantId, nameof(RegisterAsync));
             
-            result.SetError(ex.Message, ErrorType.Exception);
+            result.SetError(OperationMessages.UnexpectedError, ErrorType.Exception);
         }
         
         return result;

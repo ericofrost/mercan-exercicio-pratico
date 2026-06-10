@@ -56,7 +56,7 @@ public class ExpensesController(IExpensesService expensesService, ICurrentUserSe
     /// </returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -129,7 +129,7 @@ public class ExpensesController(IExpensesService expensesService, ICurrentUserSe
     /// </returns>
     [HttpPost("{id:guid}/reject")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -165,7 +165,7 @@ public class ExpensesController(IExpensesService expensesService, ICurrentUserSe
     /// </returns>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<Expense>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -202,7 +202,7 @@ public class ExpensesController(IExpensesService expensesService, ICurrentUserSe
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<DetailedExpense>> GetExpenseDetailsAsync([FromRoute] Guid id, GetPaginatedExpensesRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<DetailedExpense>> GetExpenseDetailsAsync([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var ctx = CreateLogContext();
         var user = GetCurrentUserIds();
@@ -218,9 +218,9 @@ public class ExpensesController(IExpensesService expensesService, ICurrentUserSe
             return FromResult(result, _ => Ok());
         }
 
-        var response = mapper.Map<DetailedExpense>(result);
+        var response = mapper.Map<DetailedExpense>(result.Data);
 
-        ApiLogs.OperationCompleted(logger, ctx, user.TenantId, detail: $"Item={result}");
+        ApiLogs.OperationCompleted(logger, ctx, user.TenantId, detail: $"expenseId={id}");
 
         return response != null? Ok(response) : NotFound();
     }

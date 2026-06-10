@@ -1,7 +1,4 @@
-﻿using ER.Application.Services.Expenses;
-using ValidationFailure = FluentValidation.Results.ValidationFailure;
-
-namespace ER.Application.Validators;
+﻿namespace ER.Application.Validators;
 
 public class ExpenseStatusChangeValidator : ServiceValidatorModelComparer<ChangeExpenseStatusDto, Expense, bool>
 {

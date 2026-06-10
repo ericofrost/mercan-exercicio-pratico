@@ -1,3 +1,4 @@
 ﻿namespace ER.WebApi.Controllers.Expenses;
 
-public record RejectExpenseRequest(string  RejectReason);
+public record RejectExpenseRequest(
+    [property: Required(AllowEmptyStrings = false)] string RejectReason);

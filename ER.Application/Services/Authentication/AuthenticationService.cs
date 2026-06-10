@@ -42,7 +42,7 @@ public class AuthenticationService(UserManager<ApplicationUser> userManager, ITo
         {
             ApplicationLogs.OperationFailedUnexpectedly(logger, e, ctx, request.TenantId, nameof(LoginAsync));
             
-            result.SetError(e.Message, ErrorType.Exception);
+            result.SetError(OperationMessages.UnexpectedError, ErrorType.Exception);
         }
 
         return result;

@@ -1,1 +1,9 @@
 ﻿global using Xunit;
+global using FluentAssertions;
+global using System.Net;
+global using System.Net.Http.Json;
+global using ER.Application.Authentication;
+global using ER.Domain.Enums;
+global using ER.Domain.Models;
+global using ER.Infrastructure.Seeds.Data;
+global using ER.WebApi.Controllers.Expenses;

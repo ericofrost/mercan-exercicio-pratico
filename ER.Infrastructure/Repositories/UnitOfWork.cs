@@ -43,6 +43,11 @@ public class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork
             throw new InvalidOperationException("A transaction is already in progress.");
         }
 
+        if (!_dbContext.Database.IsRelational())
+        {
+            return Task.CompletedTask;
+        }
+
         var ambient = _dbContext.Database.CurrentTransaction;
 
         if (ambient is null) return BeginOwnedTransactionAsync();
@@ -63,9 +68,14 @@ public class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork
     }
 
     /// <inheritdoc />
-    /// <exception cref="InvalidOperationException">Thrown when no transaction is in progress.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when no transaction is in progress on a relational provider.</exception>
     public async Task CommitTransactionAsync()
     {
+        if (!_dbContext.Database.IsRelational())
+        {
+            return;
+        }
+
         if (_currentTransaction is null)
         {
             throw new InvalidOperationException("No transaction is in progress.");
@@ -82,12 +92,11 @@ public class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork
     }
 
     /// <inheritdoc />
-    /// <exception cref="InvalidOperationException">Thrown when no transaction is in progress.</exception>
     public async Task RollbackTransactionAsync()
     {
-        if (_currentTransaction is null)
+        if (!_dbContext.Database.IsRelational() || _currentTransaction is null)
         {
-            throw new InvalidOperationException("No transaction is in progress.");
+            return;
         }
 
         if (_ownsTransaction)

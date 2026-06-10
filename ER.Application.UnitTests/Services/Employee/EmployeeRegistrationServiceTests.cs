@@ -61,7 +61,7 @@ public class EmployeeRegistrationServiceTests
         var result = await sut.RegisterAsync(request);
 
         result.Success.Should().BeFalse();
-        result.Error.Should().ContainSingle(e => e.ErrorType == ErrorType.Exception && e.ErrorMessage == "Save failed.");
+        result.Error.Should().ContainSingle(e => e.ErrorType == ErrorType.Exception && e.ErrorMessage == OperationMessages.UnexpectedError);
         _fixture.UnitOfWork.Verify(u => u.RollbackTransactionAsync(), Times.Once);
     }
 }

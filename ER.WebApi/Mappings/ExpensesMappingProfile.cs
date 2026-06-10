@@ -1,6 +1,3 @@
-using ER.Application.Common.Pagination;
-using ER.Application.Services.Common;
-using ER.WebApi.Controllers.Common;
 using ApiExpense = ER.WebApi.Controllers.Expenses.Expense;
 
 namespace ER.WebApi.Mappings;

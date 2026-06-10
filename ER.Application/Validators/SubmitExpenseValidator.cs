@@ -1,6 +1,4 @@
-﻿using ER.Application.Services.Expenses;
-
-namespace ER.Application.Validators;
+﻿namespace ER.Application.Validators;
 
 public class SubmitExpenseValidator : ServiceValidator<SubmitExpenseRequestDto, bool>
 {
@@ -13,7 +11,14 @@ public class SubmitExpenseValidator : ServiceValidator<SubmitExpenseRequestDto, 
         RuleFor(x => x).NotNull();
         RuleFor(x => x).MustAsync(ExpenseNotExist).WithMessage("Expense already exists");
         RuleFor(x => x.TenantId).MustAsync(TenantExistsAsync).WithMessage("Tenant must exist");
+        RuleFor(x => x.TenantId)
+            .Must(tenantId => tenantId == currentUserService.TenantId)
+            .WithMessage("Expense must belong to the authenticated tenant.");
         RuleFor(x => x).MustAsync(EmployeeExistsInTenantAsync).WithMessage("Employee must exist");
+        RuleFor(x => x.EmployeeId)
+            .Must(employeeId => employeeId == currentUserService.EmployeeId)
+            .WithMessage("Expense must belong to the authenticated employee.");
+        RuleFor(x => x).Must(x => x.ExpenseDate > DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-90))).WithMessage("Expense Date cannot be older than 90 days.");
         RuleFor(x => x).Must(x => x.ExpenseDate < DateOnly.FromDateTime(x.SubmittedAt)).WithMessage("Expense Date cannot be before Expense Date");
         RuleFor(x => x.Status).Equal(ExpenseStatus.Pending).WithMessage("Expense Status must be pending.");
     }

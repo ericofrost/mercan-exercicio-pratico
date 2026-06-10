@@ -7,6 +7,7 @@ global using ER.Application.Interfaces.Validators;
 global using ER.Application.Services.Authentication;
 global using ER.Application.Services.Common;
 global using ER.Application.Services.Employee;
+global using ER.Application.Services.Expenses;
 global using ER.Application.UnitTests.Builders;
 global using ER.Application.UnitTests.Fixtures;
 global using ER.Application.UnitTests.Helpers;

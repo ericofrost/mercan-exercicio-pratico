@@ -138,8 +138,8 @@ public class GenericRepository<T>(ApplicationDbContext dbContext) : IGenericRepo
                 var sourcePropVal = sourceProp.GetValue(source);
                 
                 var destinationProp = destination.GetType().GetProperty(sourceProp.Name);
-                
-                var destPropVal = destination.GetType().GetProperty(sourceProp.Name)?.GetValue(source);
+
+                var destPropVal = destinationProp?.GetValue(destination);
 
                 if ((!sourcePropVal?.Equals(destPropVal)) ?? true)
                 {

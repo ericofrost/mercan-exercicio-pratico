@@ -27,6 +27,12 @@ public sealed class EmployeeBuilder
         return this;
     }
 
+    public EmployeeBuilder WithRole(EmployeeRole role)
+    {
+        _role = role;
+        return this;
+    }
+
     public EmployeeBuilder Inactive()
     {
         _isActive = false;

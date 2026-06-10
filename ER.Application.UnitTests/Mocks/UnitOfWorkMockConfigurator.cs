@@ -5,20 +5,23 @@ public static class UnitOfWorkMockConfigurator
     public sealed record UnitOfWorkMocks(
         Mock<IUnitOfWork> UnitOfWork,
         Mock<IGenericRepository<Employee>> EmployeeRepository,
-        Mock<IGenericRepository<Tenant>> TenantRepository);
+        Mock<IGenericRepository<Tenant>> TenantRepository,
+        Mock<IGenericRepository<Expense>> ExpenseRepository);
 
     public static UnitOfWorkMocks CreateWithRepositories()
     {
         var unitOfWork = new Mock<IUnitOfWork>();
         var employeeRepository = new Mock<IGenericRepository<Employee>>();
         var tenantRepository = new Mock<IGenericRepository<Tenant>>();
+        var expenseRepository = new Mock<IGenericRepository<Expense>>();
 
         unitOfWork.Setup(u => u.Repository<Employee>()).Returns(employeeRepository.Object);
         unitOfWork.Setup(u => u.Repository<Tenant>()).Returns(tenantRepository.Object);
+        unitOfWork.Setup(u => u.Repository<Expense>()).Returns(expenseRepository.Object);
 
         SetupTransaction(unitOfWork);
 
-        return new UnitOfWorkMocks(unitOfWork, employeeRepository, tenantRepository);
+        return new UnitOfWorkMocks(unitOfWork, employeeRepository, tenantRepository, expenseRepository);
     }
 
     public static void SetupTransaction(Mock<IUnitOfWork> unitOfWork)
@@ -40,5 +43,18 @@ public static class UnitOfWorkMockConfigurator
         unitOfWork
             .Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(exception);
+    }
+
+    public static void SetupGetAllWithFiltersAsync<T>(
+        Mock<IGenericRepository<T>> repository,
+        IEnumerable<T> items) where T : Domain.Base.BaseModel
+    {
+        repository
+            .Setup(r => r.GetAllWithFiltersAsync(
+                It.IsAny<Expression<Func<T, bool>>>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<Expression<Func<T, object>>[]>()))
+            .Returns<Expression<Func<T, bool>>, CancellationToken, Expression<Func<T, object>>[]>(
+                (filter, _, _) => Task.FromResult<IEnumerable<T>>(items.Where(filter.Compile()).ToList()));
     }
 }

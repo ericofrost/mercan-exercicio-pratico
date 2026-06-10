@@ -94,6 +94,6 @@ public class AuthenticationServiceTests
         var result = await sut.LoginAsync(request);
 
         result.Success.Should().BeFalse();
-        result.Error.Should().ContainSingle(e => e.ErrorType == ErrorType.Exception && e.ErrorMessage == "Database unavailable.");
+        result.Error.Should().ContainSingle(e => e.ErrorType == ErrorType.Exception && e.ErrorMessage == OperationMessages.UnexpectedError);
     }
 }

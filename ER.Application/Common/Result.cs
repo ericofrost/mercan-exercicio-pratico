@@ -1,6 +1,4 @@
-﻿using ValidationFailure = FluentValidation.Results.ValidationFailure;
-
-namespace ER.Application.Common;
+﻿namespace ER.Application.Common;
 
 /// <summary>
 /// Represents the outcome of an application operation with a typed payload.
