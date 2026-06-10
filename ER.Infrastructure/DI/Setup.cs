@@ -1,4 +1,4 @@
-﻿namespace ER.Infrastructure.DI;
+namespace ER.Infrastructure.DI;
 
 /// <summary>
 /// Registers infrastructure services, persistence, identity, authentication, and database initialization components.
@@ -24,9 +24,9 @@ public static class Setup
         services.AddScoped<SampleDataSeeder>();
         services.AddScoped<ApplicationDbContextInitializer>();
 
-        AddAuthenticationConfiguration(services, configuration);
-
         AddIdentityConfiguration(services);
+
+        AddAuthenticationConfiguration(services, configuration);
 
         ConfigureInfrastructureServices(services);
     }
@@ -65,6 +65,33 @@ public static class Setup
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.Events.OnRedirectToLogin = context =>
+            {
+                if (context.Request.Path.StartsWithSegments("/api"))
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                }
+
+                context.Response.Redirect(context.RedirectUri);
+                return Task.CompletedTask;
+            };
+
+            options.Events.OnRedirectToAccessDenied = context =>
+            {
+                if (context.Request.Path.StartsWithSegments("/api"))
+                {
+                    context.Response.StatusCode = 403;
+                    return Task.CompletedTask;
+                }
+
+                context.Response.Redirect(context.RedirectUri);
+                return Task.CompletedTask;
+            };
+        });
     }
 
     /// <summary>

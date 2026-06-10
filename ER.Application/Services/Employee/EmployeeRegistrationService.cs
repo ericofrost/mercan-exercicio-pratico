@@ -15,6 +15,7 @@ public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<App
     /// </exception>
     public async Task<Result<RegisterEmployeeResult>> RegisterAsync(RegisterEmployeeRequest request, CancellationToken cancellationToken = default)
     {
+        var ctx = LogContext.For<EmployeeRegistrationService>();
         var result = Result<RegisterEmployeeResult>.Create();
 
         if (!await validator.SetValidationResultAsync(result, request, cancellationToken))
@@ -42,7 +43,7 @@ public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<App
 
                 var errorCodes = string.Join(", ", createResult.Errors.Select(e => e.Code));
                 
-                EmployeeRegistrationServiceLogs.IdentityUserCreationFailed(logger, request.TenantId, errorCodes);
+                ApplicationLogs.OperationRejected(logger, ctx, request.TenantId, "Identity user creation failed", errorCodes: errorCodes);
                 
                 result.SetError("User creation failed.", ErrorType.Service);
                 
@@ -51,7 +52,7 @@ public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<App
 
             await unitOfWork.CommitTransactionAsync();
 
-            EmployeeRegistrationServiceLogs.RegistrationSucceeded(logger, request.TenantId, employee.Id, user.Id, request.Role);
+            ApplicationLogs.OperationCompleted(logger, ctx, request.TenantId, employee.Id, user.Id, request.Role);
             
             result.SetData(new RegisterEmployeeResult(employee.Id, user.Id));
         }
@@ -59,7 +60,7 @@ public class EmployeeRegistrationService(IUnitOfWork unitOfWork, UserManager<App
         {
             await unitOfWork.RollbackTransactionAsync();
             
-            EmployeeRegistrationServiceLogs.RegistrationFailedUnexpectedly(logger, ex, request.TenantId);
+            ApplicationLogs.OperationFailedUnexpectedly(logger, ex, ctx, request.TenantId, nameof(RegisterAsync));
             
             result.SetError(ex.Message, ErrorType.Exception);
         }

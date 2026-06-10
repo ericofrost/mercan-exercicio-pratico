@@ -5,7 +5,8 @@
 /// </summary>
 /// <typeparam name="T">The request type to validate.</typeparam>
 /// <typeparam name="TResult">The result payload type associated with the operation.</typeparam>
-public interface IServiceValidator<in T,TResult> where T : class where TResult : class
+/// <typeparam name="TModel">Model for comparison</typeparam>
+public interface IServiceValidator<in T, TResult> where T : class
 {
     /// <summary>
     /// Runs validation for the supplied request and updates the result with any validation failures.

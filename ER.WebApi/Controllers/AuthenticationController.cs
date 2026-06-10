@@ -20,18 +20,19 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        AuthenticationControllerLogs.LoginStarted(logger, request.TenantId);
+        var ctx = LogContext.For<AuthenticationController>();
+        ApiLogs.OperationStarted(logger, ctx, request.TenantId);
 
         var result = await authenticationService.LoginAsync(request, cancellationToken);
 
         if (!result.Success)
         {
-            AuthenticationControllerLogs.LoginRejected(logger, request.TenantId);
+            ApiLogs.OperationRejected(logger, ctx, request.TenantId, "Login request rejected", StatusCodes.Status401Unauthorized);
             
             return Unauthorized(new { message = result.Error });
         }
 
-        AuthenticationControllerLogs.LoginCompleted(logger, request.TenantId);
+        ApiLogs.OperationCompleted(logger, ctx, request.TenantId);
         
         return Ok(result.Data);
     }
@@ -48,18 +49,19 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterEmployeeRequest request, CancellationToken cancellationToken)
     {
-        AuthenticationControllerLogs.RegistrationStarted(logger, request.TenantId, request.Role);
+        var ctx = LogContext.For<AuthenticationController>();
+        ApiLogs.OperationStarted(logger, ctx, request.TenantId);
 
         var result = await registrationService.RegisterAsync(request, cancellationToken);
 
         if (!result.Success)
         {
-            AuthenticationControllerLogs.RegistrationRejected(logger, request.TenantId);
+            ApiLogs.OperationRejected(logger, ctx, request.TenantId, "Registration request rejected", StatusCodes.Status400BadRequest);
             
             return BadRequest(new { message = result.Error });
         }
 
-        AuthenticationControllerLogs.RegistrationCompleted(logger, request.TenantId, result.Data!.EmployeeId, result.Data.UserId);
+        ApiLogs.OperationCompleted(logger, ctx, request.TenantId, result.Data!.EmployeeId, result.Data.UserId, request.Role);
         
         return CreatedAtAction(nameof(Login), result.Data);
     }

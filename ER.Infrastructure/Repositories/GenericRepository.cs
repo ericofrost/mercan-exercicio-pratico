@@ -9,16 +9,34 @@ public class GenericRepository<T>(ApplicationDbContext dbContext) : IGenericRepo
     private readonly DbSet<T> _dbSet = dbContext.Set<T>();
 
     /// <inheritdoc />
-    public async Task AddAsync(T entity, CancellationToken cancellationToken = default) => await _dbSet.AddAsync(entity, cancellationToken);
+    public virtual async Task AddAsync(T entity, CancellationToken cancellationToken = default) => await _dbSet.AddAsync(entity, cancellationToken);
 
     /// <inheritdoc />
-    public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
+    public virtual async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+    {
+        var entry = await _dbSet.SingleAsync(x => x.Id == entity.Id, cancellationToken);
+        
+        CopyProperties(entity, entry);
+        
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+    
+    /// <inheritdoc />
+    public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbSet.AsNoTracking().ToListAsync(cancellationToken: cancellationToken);
     }
+    
+    /// <inheritdoc />
+    public virtual async Task<IEnumerable<T>> GetAllWithFiltersAsync(Expression<Func<T, bool>> filter,CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes)
+    {
+        var source = GetEntityWithIncludes(includes);
+        
+        return await source.Where(filter).ToListAsync(cancellationToken: cancellationToken);
+    }
 
     /// <inheritdoc />
-    public async Task<bool> ExistsWithFilterAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes)
+    public virtual async Task<bool> ExistsWithFilterAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes)
     {
         var source = GetEntityWithIncludes(includes);
 
@@ -26,13 +44,13 @@ public class GenericRepository<T>(ApplicationDbContext dbContext) : IGenericRepo
     }
 
     /// <inheritdoc />
-    public async Task<bool> ExistsWithFilterAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
+    public virtual async Task<bool> ExistsWithFilterAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
     {
         return await ExistsWithFilterAsync(filter, cancellationToken, []);
     }
 
     /// <inheritdoc />
-    public Task<(int, IEnumerable<T>)> GetPaginatedListAsync(Expression<Func<T, bool>> filter, string orderBy, string order, int rowsPerPage, int currentPage, CancellationToken cancellationToken = default)
+    public virtual Task<(int, IEnumerable<T>)> GetPaginatedListAsync(Expression<Func<T, bool>> filter, string orderBy, string order, int rowsPerPage, int currentPage, CancellationToken cancellationToken = default)
     {
         // TODO: Apply pagination
         return Task.FromResult<(int, IEnumerable<T>)>((0, []));
@@ -43,10 +61,30 @@ public class GenericRepository<T>(ApplicationDbContext dbContext) : IGenericRepo
     /// </summary>
     /// <param name="includes">Navigation properties to include in the query.</param>
     /// <returns>An <see cref="IQueryable{T}"/> prepared for further filtering.</returns>
-    private IQueryable<T> GetEntityWithIncludes(params Expression<Func<T, object>>[] includes)
+    protected virtual IQueryable<T> GetEntityWithIncludes(params Expression<Func<T, object>>[] includes)
     {
         var query = _dbSet.AsQueryable();
 
         return includes.Length > 0 ? includes.Aggregate(query, (current, include) => current.Include(include)) : query;
+    }
+    
+    private static void CopyProperties(T source, T destination)
+    {
+        var sourceProps = source.GetType().GetProperties().ToList();
+
+        sourceProps.ForEach(sourceProp =>
+            {
+                var sourcePropVal = sourceProp.GetValue(source);
+                
+                var destinationProp = destination.GetType().GetProperty(sourceProp.Name);
+                
+                var destPropVal = destination.GetType().GetProperty(sourceProp.Name)?.GetValue(source);
+
+                if ((!sourcePropVal?.Equals(destPropVal)) ?? true)
+                {
+                    destinationProp?.SetValue(destination, sourceProp.GetValue(source));
+                }
+            }
+        );
     }
 }

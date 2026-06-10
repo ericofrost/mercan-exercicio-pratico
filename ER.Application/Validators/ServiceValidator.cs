@@ -5,10 +5,16 @@
 /// </summary>
 /// <typeparam name="T">The request type to validate.</typeparam>
 /// <typeparam name="TResult">The result payload type associated with the operation.</typeparam>
-public abstract class ServiceValidator<T,TResult> : AbstractValidator<T> , IServiceValidator<T,TResult> where T : class where TResult : class
+/// <typeparam name="TModel">Database Model for comparison </typeparam>
+public abstract class ServiceValidator<T, TResult>(IUnitOfWork unitOfWork) : AbstractValidator<T>, IServiceValidator<T, TResult>
+    where T : class
 {
+    protected readonly IGenericRepository<Employee> EmployeeRepository = unitOfWork.Repository<Employee>();
+    protected readonly IGenericRepository<Tenant> TenantRepository = unitOfWork.Repository<Tenant>();
+
     /// <inheritdoc />
-    public virtual async Task<bool> SetValidationResultAsync(Result<TResult> result, T data, CancellationToken cancellationToken = default)    {
+    public virtual async Task<bool> SetValidationResultAsync(Result<TResult> result, T data, CancellationToken cancellationToken = default)    
+    {
         var validationResult = await this.ValidateAsync(data, cancellationToken);
         
         result.Validation = validationResult;
@@ -19,5 +25,15 @@ public abstract class ServiceValidator<T,TResult> : AbstractValidator<T> , IServ
         }
         
         return validationResult.IsValid;
+    }
+
+    protected virtual async Task<bool> TenantExistsAsync(Guid tenantId, CancellationToken cancellationToken)
+    {
+        return await TenantRepository.ExistsWithFilterAsync(t => t.Id == tenantId && t.IsActive, cancellationToken);
+    }
+    
+    protected virtual async Task<bool> EmailTakenAsync(RegisterEmployeeRequest request, CancellationToken cancellationToken)
+    {
+        return await EmployeeRepository.ExistsWithFilterAsync(e => e.TenantId == request.TenantId && e.Email == request.Email, cancellationToken);
     }
 }

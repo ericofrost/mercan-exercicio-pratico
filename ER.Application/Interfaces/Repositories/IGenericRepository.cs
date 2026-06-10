@@ -1,4 +1,4 @@
-﻿namespace ER.Application.Interfaces.Repositories;
+namespace ER.Application.Interfaces.Repositories;
 
 /// <summary>
 /// Generic persistence contract for entities deriving from <see cref="BaseModel"/>.
@@ -14,11 +14,27 @@ public interface IGenericRepository<T> where T : BaseModel
     Task AddAsync(T entity, CancellationToken cancellationToken = default);
     
     /// <summary>
+    /// Updates an entity on the repository.
+    /// </summary>
+    /// <param name="entity">The entity to add.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
+    
+    /// <summary>
     /// Retrieves all entities of type <typeparamref name="T"/>.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A collection of all entities.</returns>
     Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves all entities of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="filter">Query filter</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <param name="includes">Entities to eager load</param>
+    /// <returns>A collection of all entities that match the filter.</returns>
+    Task<IEnumerable<T>> GetAllWithFiltersAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes);
     
     /// <summary>
     /// Checks if any entities of type <typeparamref name="T"/> exist in the database 

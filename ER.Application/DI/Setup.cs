@@ -1,4 +1,7 @@
-﻿namespace ER.Application.DI;
+﻿using ER.Application.Interfaces.Services;
+using ER.Application.Services.Expenses;
+
+namespace ER.Application.DI;
 
 /// <summary>
 /// Registers application-layer services in the dependency injection container.
@@ -16,10 +19,13 @@ public static class Setup
         services.AddScoped<IEmployeeRegistrationService, EmployeeRegistrationService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ITokenGeneratorService, JwtTokenGeneratorService>();
+        services.AddScoped<IExpensesService, ExpensesService>();
         
         //Validators
         services.AddScoped<IValidator<PaginationQuery>, PaginationValidator>();
         services.AddScoped<IServiceValidator<LoginRequest,LoginResponse>, LoginValidator>();
         services.AddScoped<IServiceValidator<RegisterEmployeeRequest,RegisterEmployeeResult>, EmployeeRegistrationValidator>();
+        services.AddScoped<IServiceValidator<SubmitExpenseRequestDto, bool>, SubmitExpenseValidator>();
+        services.AddScoped<IServiceValidator<ChangeExpenseStatusDto, bool>, ExpenseStatusChangeValidator>();
     }
 }

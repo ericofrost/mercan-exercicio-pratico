@@ -29,6 +29,8 @@ public class JwtTokenGeneratorService : ITokenGeneratorService
     /// </exception>
     public async ValueTask<string?> GenerateTokenAsync(GenerateTokenRequest request)
     {
+        var ctx = LogContext.For<JwtTokenGeneratorService>();
+
         try
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
@@ -53,13 +55,13 @@ public class JwtTokenGeneratorService : ITokenGeneratorService
 
             var token = _handler.CreateToken(descriptor);
 
-            JwtTokenGeneratorServiceLogs.TokenCreated(_logger, request.TenantId, request.EmployeeId, expiryMinutes);
+            ApplicationLogs.OperationDebug(_logger, ctx, $"expiryMinutes={expiryMinutes}", request.TenantId, request.EmployeeId);
 
             return await ValueTask.FromResult(token);
         }
         catch (Exception ex)
         {
-            JwtTokenGeneratorServiceLogs.JwtConfigurationInvalid(_logger, ex);
+            ApplicationLogs.OperationFailedUnexpectedly(_logger, ex, ctx, request.TenantId, nameof(GenerateTokenAsync));
 
             throw;
         }

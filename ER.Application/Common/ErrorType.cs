@@ -13,5 +13,10 @@ public enum ErrorType
     /// <summary>
     /// Unexpected failure caused by an exception during processing.
     /// </summary>
-    Exception
+    Exception,
+    
+    /// <summary>
+    /// Record Not found 
+    /// </summary>
+    NotFound
 }

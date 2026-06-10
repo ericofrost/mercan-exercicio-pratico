@@ -1,4 +1,6 @@
-﻿namespace ER.Domain.Models;
+﻿using System.ComponentModel;
+
+namespace ER.Domain.Models;
 
 /// <summary>
 /// Represents an expense submitted by an employee and reviewed within a tenant boundary.
@@ -68,12 +70,12 @@ public class Expense : BaseModel
     /// <summary>
     /// Navigation property to the tenant this expense belongs to.
     /// </summary>
-    public required Tenant Tenant { get; set; }
+    public Tenant? Tenant { get; set; }
 
     /// <summary>
     /// Navigation property to the employee who submitted the expense.
     /// </summary>
-    public required Employee Employee { get; set; }
+    public Employee? Employee { get; set; }
 
     /// <summary>
     /// Navigation property to the manager who approved or rejected the expense.
@@ -107,7 +109,7 @@ public class Expense : BaseModel
     /// <param name="rejectionReason">Optional rejection reason.</param>
     /// <param name="decidedBy">Optional navigation to the deciding manager.</param>
     [SetsRequiredMembers]
-    public Expense(Guid id, Guid tenantId, Guid employeeId, decimal amount, DateOnly expenseDate, DateTime submittedAt, Tenant tenant, Employee employee, Currency currency = Currency.Eur, ExpenseCategory category = ExpenseCategory.Other, ExpenseStatus status = ExpenseStatus.Pending, string? description = null, DateTime? decidedAt = null, Guid? decidedByEmployeeId = null, string? rejectionReason = null, Employee? decidedBy = null) : base(id)
+    public Expense(Guid id, Guid tenantId, Guid employeeId, decimal amount, DateOnly expenseDate, DateTime submittedAt, Tenant? tenant, Employee? employee, Currency currency = Currency.Eur, ExpenseCategory category = ExpenseCategory.Other, ExpenseStatus status = ExpenseStatus.Pending, string? description = null, DateTime? decidedAt = null, Guid? decidedByEmployeeId = null, string? rejectionReason = null, Employee? decidedBy = null) : base(id)
     {
         TenantId = tenantId;
         EmployeeId = employeeId;
@@ -136,9 +138,6 @@ public class Expense : BaseModel
     /// </exception>
     public static Expense Create(ExpenseSpecification specification)
     {
-        ArgumentNullException.ThrowIfNull(specification.Tenant);
-        ArgumentNullException.ThrowIfNull(specification.Employee);
-
         return new Expense(
             Guid.NewGuid(),
             specification.TenantId,
@@ -156,5 +155,26 @@ public class Expense : BaseModel
             specification.DecidedByEmployeeId,
             specification.RejectionReason,
             specification.DecidedBy);
+    }
+
+    /// <summary>
+    /// Sets the approval or rejection status
+    /// </summary>
+    /// <param name="status">The approval status</param>
+    /// <param name="employeeId">The employee responsible for the status change</param>
+    /// <param name="rejectionReason">The reason in case of a rejection</param>
+    public void SetApprovalDetails(ExpenseStatus status, Guid employeeId, string? rejectionReason = null)
+    {
+        Status = status;
+        DecidedAt = DateTime.UtcNow;
+        DecidedByEmployeeId = employeeId;
+        RejectionReason = rejectionReason;
+    }
+
+    public bool ValidateApprovalAmount(decimal totalExpenses)
+    {
+        if(Tenant is null) throw new ArgumentNullException(nameof(Tenant), Description = "This is a newly created expense, it needs to be associated with a tenant.");
+        
+        return Amount + totalExpenses <= Tenant.MonthlyExpenseLimit;
     }
 }

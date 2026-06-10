@@ -1,0 +1,3 @@
+﻿namespace ER.WebApi.Controllers.Expenses;
+
+public sealed record SubmitExpenseRequest(Guid? Id, Guid TenantId, Guid EmployeeId, decimal Amount, DateOnly ExpenseDate, DateTime SubmittedAt, string EmployeeName, Currency Currency, ExpenseCategory Category, string? Description = null, ExpenseStatus Status = ExpenseStatus.Pending) : Expense(Id, TenantId, EmployeeId, Amount, ExpenseDate, SubmittedAt, EmployeeName, Currency, Category, Description, Status);

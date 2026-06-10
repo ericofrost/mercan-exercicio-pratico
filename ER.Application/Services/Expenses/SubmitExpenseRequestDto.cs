@@ -1,0 +1,3 @@
+﻿namespace ER.Application.Services.Expenses;
+
+public record SubmitExpenseRequestDto(Guid Id, Guid TenantId, Guid EmployeeId, decimal Amount, DateOnly ExpenseDate, DateTime SubmittedAt, string EmployeeName, Currency Currency, ExpenseCategory Category, string? Description = null, ExpenseStatus Status = ExpenseStatus.Pending) : ExpenseDto(Id, TenantId, EmployeeId, Amount, ExpenseDate, SubmittedAt, EmployeeName, Currency, Category, Description, Status);

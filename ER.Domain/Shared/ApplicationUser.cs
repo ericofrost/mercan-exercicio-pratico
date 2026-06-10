@@ -3,7 +3,7 @@
 /// <summary>
 /// ASP.NET Core Identity user linked one-to-one to an <see cref="Models.Employee"/> via a shared primary key.
 /// </summary>
-public class ApplicationUser : IdentityUser<Guid>
+public sealed class ApplicationUser : IdentityUser<Guid>
 {
     /// <summary>
     /// Tenant this user belongs to. Used for login resolution and JWT claims.

@@ -41,28 +41,29 @@ public class ApplicationDbContextInitializer(
     /// </remarks>
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
+        var ctx = LogContext.For<ApplicationDbContextInitializer>();
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
             if (await ShouldDropTablesAsync(cancellationToken))
             {
-                ApplicationDbContextInitializerLogs.DroppingApplicationTables(logger);
+                InfrastructureLogs.OperationDebug(logger, ctx, "Dropping application tables before migrations in development");
                 await DropApplicationTablesAsync(cancellationToken);
             }
 
             await ApplyMigrationsAsync(cancellationToken);
-            ApplicationDbContextInitializerLogs.MigrationsApplied(logger);
+            InfrastructureLogs.OperationCompleted(logger, ctx, detail: "Database migrations applied successfully");
 
             if (databaseSettings.Value.SeedSampleData)
                 await sampleDataSeeder.SeedAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
-            ApplicationDbContextInitializerLogs.InitializationCompleted(logger);
+            InfrastructureLogs.OperationCompleted(logger, ctx, detail: "Database initialization completed successfully");
         }
         catch (Exception ex)
         {
-            ApplicationDbContextInitializerLogs.InitializationFailed(logger, ex, "InitializeAsync");
+            InfrastructureLogs.OperationFailedUnexpectedly(logger, ex, ctx, operation: nameof(InitializeAsync));
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }

@@ -28,5 +28,6 @@ global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 global using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 global using System;
+global using System.Runtime.CompilerServices;
 global using System.Linq.Expressions;
 global using System.Text;

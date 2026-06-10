@@ -10,6 +10,7 @@ public class AuthenticationService(UserManager<ApplicationUser> userManager, ITo
     /// <inheritdoc />
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
+        var ctx = LogContext.For<AuthenticationService>();
         var result = Result<LoginResponse>.Create();
 
         try
@@ -33,13 +34,13 @@ public class AuthenticationService(UserManager<ApplicationUser> userManager, ITo
             
             if (!result.Success) return result;
         
-            AuthenticationServiceLogs.LoginSucceeded(logger, request.TenantId, user!.Employee!.Id);
+            ApplicationLogs.OperationCompleted(logger, ctx, request.TenantId, user!.Employee!.Id);
 
             result.SetData(new LoginResponse(token!, expiresAt));
         }
         catch (Exception e)
         {
-            AuthenticationServiceLogs.LoginFailed(logger, request.TenantId);
+            ApplicationLogs.OperationFailedUnexpectedly(logger, e, ctx, request.TenantId, nameof(LoginAsync));
             
             result.SetError(e.Message, ErrorType.Exception);
         }
@@ -51,7 +52,9 @@ public class AuthenticationService(UserManager<ApplicationUser> userManager, ITo
     {
         if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
         {
-            AuthenticationServiceLogs.LoginFailed(logger, request.TenantId);
+            var ctx = new LogContext(nameof(AuthenticationService), nameof(CheckUserPassword));
+            
+            ApplicationLogs.OperationRejected(logger, ctx, request.TenantId, InvalidCredentialsMessage);
             
             result.SetError(InvalidCredentialsMessage, ErrorType.Service);
         }
@@ -61,7 +64,8 @@ public class AuthenticationService(UserManager<ApplicationUser> userManager, ITo
     {
         if (string.IsNullOrWhiteSpace(token))
         {
-            AuthenticationServiceLogs.TokenGenerationEmpty(logger, request.TenantId, user.Employee!.Id);
+            var ctx = new LogContext(nameof(AuthenticationService), nameof(CheckToken));
+            ApplicationLogs.OperationRejected(logger, ctx, request.TenantId, "Token generation empty", errorCodes: user.Employee!.Id.ToString());
             
             result.SetError(InvalidCredentialsMessage, ErrorType.Service);
         }

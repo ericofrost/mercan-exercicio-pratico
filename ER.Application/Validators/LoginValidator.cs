@@ -5,7 +5,7 @@
 /// </summary>
 public class LoginValidator : ServiceValidator<LoginRequest,LoginResponse>
 {
-    public LoginValidator()
+    public LoginValidator(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
         RuleFor(r => r.Email).NotNull().NotEmpty();
         RuleFor(r => r.TenantId).NotNull().NotEmpty();

@@ -15,9 +15,11 @@ public class SampleDataSeeder(ApplicationDbContext context, UserManager<Applicat
     /// </exception>
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
+        var ctx = LogContext.For<SampleDataSeeder>();
+
         if (await IsSampleDataPresentAsync(cancellationToken))
         {
-            SampleDataSeederLogs.SampleDataAlreadyPresent(logger);
+            InfrastructureLogs.OperationCompleted(logger, ctx, detail: "Sample data already present. Skipping seed.");
             return;
         }
 
@@ -25,7 +27,7 @@ public class SampleDataSeeder(ApplicationDbContext context, UserManager<Applicat
         await SeedEmployeesAsync(cancellationToken);
         await SeedUsersAsync(cancellationToken);
 
-        SampleDataSeederLogs.SampleDataSeeded(logger);
+        InfrastructureLogs.OperationCompleted(logger, ctx, detail: "Sample data seeded successfully.");
     }
 
     /// <summary>
@@ -83,7 +85,8 @@ public class SampleDataSeeder(ApplicationDbContext context, UserManager<Applicat
             if (createResult.Succeeded) continue;
 
             var errorCodes = string.Join(", ", createResult.Errors.Select(error => error.Code));
-            SampleDataSeederLogs.UserSeedFailed(logger, employeeSeed.Id, errorCodes);
+            var ctx = new LogContext(nameof(SampleDataSeeder), nameof(SeedUsersAsync));
+            InfrastructureLogs.OperationRejected(logger, ctx, employeeSeed.TenantId, "Failed to seed identity user", errorCodes: errorCodes);
 
             throw new InvalidOperationException($"Failed to seed user for employee '{employeeSeed.Id}': {errorCodes}");
         }
