@@ -1,78 +1,1 @@
-﻿namespace ER.Domain.Models;
-
-/// <summary>
-/// Represents an employee belonging to a tenant. Credentials are stored separately in <see cref="Shared.ApplicationUser"/>.
-/// </summary>
-public class Employee : Model
-{
-    /// <summary>
-    /// Foreign key to the tenant this employee belongs to.
-    /// </summary>
-    public Guid TenantId { get; set; }
-
-    /// <summary>
-    /// Employee email address. Must be unique within the tenant.
-    /// </summary>
-    public string Email { get; set; } = null!;
-
-    /// <summary>
-    /// Role of the employee within the tenant.
-    /// </summary>
-    public EmployeeRole Role { get; set; }
-
-    /// <summary>
-    /// Navigation property to the tenant this employee belongs to.
-    /// </summary>
-    public Tenant? Tenant { get; set; }
-
-    /// <summary>
-    /// Expenses submitted by this employee.
-    /// </summary>
-    public ICollection<Expense>? Expenses { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance for Entity Framework Core materialization.
-    /// </summary>
-    public Employee()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new employee with the required business data.
-    /// </summary>
-    /// <param name="id">The unique identifier shared with the linked <see cref="Shared.ApplicationUser"/> when applicable.</param>
-    /// <param name="tenantId">The owning tenant identifier.</param>
-    /// <param name="name">The employee display name.</param>
-    /// <param name="email">The employee email address.</param>
-    /// <param name="role">The employee role within the tenant.</param>
-    /// <param name="isActive">Whether the employee is active. Defaults to <c>true</c>.</param>
-    /// <param name="tenant">Optional navigation to the owning tenant.</param>
-    /// <param name="expenses">Optional collection of expenses submitted by this employee.</param>
-    [SetsRequiredMembers]
-    public Employee(Guid id, Guid tenantId, string name, string email, EmployeeRole role, bool isActive = true, Tenant? tenant = null, ICollection<Expense>? expenses = null) : base(id, name, isActive)
-    {
-        TenantId = tenantId;
-        Email = email;
-        Role = role;
-        Tenant = tenant;
-        Expenses = expenses;
-    }
-
-    /// <summary>
-    /// Creates a new employee from the supplied specification, generating a new identifier.
-    /// </summary>
-    /// <param name="specification">The input values used to construct the employee.</param>
-    /// <returns>A new <see cref="Employee"/> instance.</returns>
-    public static Employee Create(EmployeeSpecification specification)
-    {
-        return new Employee(
-            Guid.NewGuid(),
-            specification.TenantId,
-            specification.Name,
-            specification.Email,
-            specification.Role,
-            specification.IsActive ?? true,
-            specification.Tenant,
-            specification.Expenses?.ToList());
-    }
-}
+﻿namespace ER.Domain.Models;/// <summary>/// Represents an employee belonging to a tenant. Credentials are stored separately in <see cref="Shared.ApplicationUser"/>./// </summary>public class Employee : Model{    /// <summary>    /// Foreign key to the tenant this employee belongs to.    /// </summary>    public Guid TenantId { get; set; }    /// <summary>    /// Employee email address. Must be unique within the tenant.    /// </summary>    public string Email { get; set; } = null!;    /// <summary>    /// Role of the employee within the tenant.    /// </summary>    public EmployeeRole Role { get; set; }    /// <summary>    /// Navigation property to the tenant this employee belongs to.    /// </summary>    public Tenant? Tenant { get; set; }    /// <summary>    /// Expenses submitted by this employee.    /// </summary>    public ICollection<Expense>? Expenses { get; set; }    /// <summary>    /// Initializes a new instance for Entity Framework Core materialization.    /// </summary>    public Employee()    {    }        /// <summary>    /// Initializes a new employee with the required business data.    /// </summary>    /// <param name="id">The unique identifier shared with the linked <see cref="Shared.ApplicationUser"/> when applicable.</param>    /// <param name="tenantId">The owning tenant identifier.</param>    /// <param name="name">The employee display name.</param>    /// <param name="email">The employee email address.</param>    /// <param name="role">The employee role within the tenant.</param>    /// <param name="isActive">Whether the employee is active. Defaults to <c>true</c>.</param>    /// <param name="tenant">Optional navigation to the owning tenant.</param>    /// <param name="expenses">Optional collection of expenses submitted by this employee.</param>    [SetsRequiredMembers]    public Employee(Guid id, Guid tenantId, string name, string email, EmployeeRole role, bool isActive = true, Tenant? tenant = null, ICollection<Expense>? expenses = null) : base(id, name, isActive)    {        TenantId = tenantId;        Email = email;        Role = role;        Tenant = tenant;        Expenses = expenses;    }    /// <summary>    /// Creates a new employee from the supplied specification, generating a new identifier.    /// </summary>    /// <param name="specification">The input values used to construct the employee.</param>    /// <returns>A new <see cref="Employee"/> instance.</returns>    public static Employee Create(EmployeeSpecification specification)    {        return new Employee(            Guid.NewGuid(),            specification.TenantId,            specification.Name,            specification.Email,            specification.Role,            specification.IsActive ?? true,            specification.Tenant,            specification.Expenses?.ToList());    }}

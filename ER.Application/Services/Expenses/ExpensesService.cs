@@ -3,6 +3,7 @@ using ER.Application.Interfaces.Services;
 namespace ER.Application.Services.Expenses;
 
 public class ExpensesService(IUnitOfWork unitOfWork, ILogger<ExpensesService> logger, IServiceValidator<SubmitExpenseRequestDto, bool> submitValidator,
+    IPaginationValidator paginationValidator,
     IServiceValidatorModelComparer<ChangeExpenseStatusDto, Expense, bool> approvalValidator, 
     ICurrentUserService currentUserService) : IExpensesService
 {
@@ -12,13 +13,6 @@ public class ExpensesService(IUnitOfWork unitOfWork, ILogger<ExpensesService> lo
     public async Task<ExpenseByTenantResult> GetAllExpensesByManagerTenant(CancellationToken cancellationToken = default)
     {
         var result = ExpenseByTenantResult.Create();
-        
-        if (currentUserService.Role != EmployeeRole.Manager)
-        {
-            result.SetError("User is not a manager.", ErrorType.Service);
-            
-            return result;
-        }
 
         try
         {
@@ -28,6 +22,41 @@ public class ExpensesService(IUnitOfWork unitOfWork, ILogger<ExpensesService> lo
             {
                 result.Data!.Add(ExpenseDto.FromModel(x));
             });
+        }
+        catch (Exception ex)
+        {
+            ApplicationLogs.OperationFailedUnexpectedly(logger, ex, _ctx, currentUserService.TenantId!.Value, nameof(GetAllExpensesByManagerTenant));
+            
+            result.SetError(ex.Message, ErrorType.Exception);
+        }
+            
+        return result;
+    }
+
+    public async Task<PagedResult<ExpenseDto>> GetAllExpensesByEmployeeTenant(PaginationRequestDto requestDto, CancellationToken cancellationToken = default)
+    {
+        var result = PagedResult<ExpenseDto>.Create(); 
+
+        try
+        {
+            if (!await paginationValidator.SetValidationResultAsync(result, requestDto, cancellationToken))
+            {
+                return result;
+            }
+            
+            result = PagedResult<ExpenseDto>.FromPaginatedRequest(requestDto);
+            
+            var expenses = await _expensesRepository.GetPaginatedListAsync(exp => exp.TenantId == currentUserService.TenantId && exp.Status == ExpenseStatus.Pending, 
+                requestDto.OrderBy, requestDto.Order, requestDto.RowsPerPage, requestDto.CurrentPage, cancellationToken) ;
+
+            if (expenses.TotalCount == 0)
+            {
+                result.SetError("No Expenses found.", ErrorType.NotFound);
+                
+                return result;
+            }
+            
+            result = PagedResult<ExpenseDto>.FromRepository(expenses.TotalCount, expenses.Records.Select(ExpenseDto.FromModel), requestDto);
         }
         catch (Exception ex)
         {
@@ -147,6 +176,32 @@ public class ExpensesService(IUnitOfWork unitOfWork, ILogger<ExpensesService> lo
             await unitOfWork.RollbackTransactionAsync();
             
             ApplicationLogs.OperationFailedUnexpectedly(logger, ex, _ctx, currentUserService.TenantId!.Value, nameof(RejectExpenseAsync));
+            
+            result.SetError(ex.Message, ErrorType.Exception);
+        }
+        
+        return result;
+    }
+
+    public async Task<DetailedExpenseResult> GetDetailedExpenseById(Guid id, CancellationToken cancellationToken = default)
+    {
+        var result = DetailedExpenseResult.Create();
+
+        try
+        {
+            var expenses = (await _expensesRepository.GetAllWithFiltersAsync(exp => exp.Id == id && exp.TenantId == currentUserService.TenantId, cancellationToken, 
+                exp => exp.Employee!, exp => exp.Tenant!)).ToList();
+
+            if (!expenses.Any())
+            {
+                result.SetError($"Expense not found.", ErrorType.NotFound);
+            }
+            
+            result.Data = DetailedExpenseDto.FromModel(expenses[0]);
+        }
+        catch (Exception ex)
+        {
+            ApplicationLogs.OperationFailedUnexpectedly(logger, ex, _ctx, currentUserService.TenantId!.Value, nameof(GetDetailedExpenseById));
             
             result.SetError(ex.Message, ErrorType.Exception);
         }

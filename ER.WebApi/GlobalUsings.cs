@@ -1,5 +1,6 @@
 ﻿global using ER.Application.Authentication;
 global using ER.Application.Common;
+global using ER.Application.Common.Pagination;
 global using ER.Application.DI;
 global using ER.Application.Interfaces.Authentication;
 global using ER.Application.Interfaces.Services;

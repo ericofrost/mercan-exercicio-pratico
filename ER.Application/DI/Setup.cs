@@ -22,7 +22,7 @@ public static class Setup
         services.AddScoped<IExpensesService, ExpensesService>();
         
         //Validators
-        services.AddScoped<IValidator<PaginationQuery>, PaginationValidator>();
+        services.AddScoped<IPaginationValidator, PaginationValidator>();
         services.AddScoped<IServiceValidator<LoginRequest,LoginResponse>, LoginValidator>();
         services.AddScoped<IServiceValidator<RegisterEmployeeRequest,RegisterEmployeeResult>, EmployeeRegistrationValidator>();
         services.AddScoped<IServiceValidator<SubmitExpenseRequestDto, bool>, SubmitExpenseValidator>();

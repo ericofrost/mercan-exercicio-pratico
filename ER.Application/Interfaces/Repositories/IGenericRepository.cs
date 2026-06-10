@@ -71,15 +71,6 @@ public interface IGenericRepository<T> where T : BaseModel
     /// <param name="currentPage">The current page number to retrieve.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A tuple containing the total count of matching records and a paginated collection of entities.</returns>
-    Task<(int, IEnumerable<T>)> GetPaginatedListAsync(Expression<Func<T, bool>> filter, string orderBy, string order, int rowsPerPage, int currentPage, CancellationToken cancellationToken = default);
+    Task<(int TotalCount, IEnumerable<T> Records)> GetPaginatedListAsync(Expression<Func<T, bool>> filter, string orderBy, string order, int rowsPerPage, int currentPage, CancellationToken cancellationToken = default);
     
-    /// <summary>
-    /// Retrieves entities matching the filter with optional related entities included.
-    /// </summary>
-    /// <param name="collectionSearch">Pagination and sorting parameters for the query.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <param name="include">Optional expression to include related entities.</param>
-    /// <param name="predicate">A LINQ expression to filter the entities.</param>
-    /// <returns>The matching entities for the requested page.</returns>
-    //Task<IEnumerable<T>> GetWithFilterPaginationAndIncludesAsync(RequestResponse collectionSearch, Func<IQueryable<T>, IQueryable<T>>? include = null, Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default);
 }

@@ -13,6 +13,7 @@ public record ExpenseDto(Guid Id, Guid TenantId, Guid EmployeeId, decimal Amount
     public static ExpenseDto FromModel(Expense model)
     {
         ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(model.Employee);
         
         return new ExpenseDto(model.Id, model.TenantId, model.EmployeeId, model.Amount, model.ExpenseDate, model.SubmittedAt, model.Employee.Name, model.Currency, model.Category, model.Description, model.Status);
     }

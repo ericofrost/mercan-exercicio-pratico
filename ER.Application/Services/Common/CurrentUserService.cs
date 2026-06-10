@@ -6,16 +6,14 @@
 public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
     /// <inheritdoc />
-    public bool IsAuthenticated =>
-        httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true;
+    public bool IsAuthenticated => httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true;
 
     /// <inheritdoc />
     public Guid? EmployeeId
     {
         get
         {
-            var sub = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
-                      ?? httpContextAccessor.HttpContext?.User.FindFirstValue("sub");
+            var sub = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? httpContextAccessor.HttpContext?.User.FindFirstValue("sub");
 
             return Guid.TryParse(sub, out var id) ? id : null;
         }
@@ -27,6 +25,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
         get
         {
             var tenantId = httpContextAccessor.HttpContext?.User.FindFirstValue("tenant_id");
+            
             return Guid.TryParse(tenantId, out var id) ? id : null;
         }
     }
@@ -37,6 +36,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
         get
         {
             var role = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
+            
             return Enum.TryParse<EmployeeRole>(role, out var parsedRole) ? parsedRole : null;
         }
     }

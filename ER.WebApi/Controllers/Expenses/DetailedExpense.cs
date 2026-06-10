@@ -1,0 +1,5 @@
+﻿using ER.WebApi.Controllers.Common;
+
+namespace ER.WebApi.Controllers.Expenses;
+
+public record DetailedExpense(Guid Id, Guid TenantId, Guid EmployeeId, decimal Amount, DateOnly ExpenseDate, DateTime SubmittedAt, Tenant? Tenant, Employee? Employee, Currency Currency = Currency.Eur, ExpenseCategory Category = ExpenseCategory.Other, ExpenseStatus Status = ExpenseStatus.Pending, string? Description = null, DateTime? DecidedAt = null, Guid? DecidedByEmployeeId = null, string? RejectionReason = null, Employee? DecidedBy = null);    

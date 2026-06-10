@@ -86,7 +86,6 @@ public class ExpensesController(IExpensesService expensesService, ICurrentUserSe
     /// <summary>
     /// Approves an expense with initial status Pending.
     /// </summary>
-    /// <param name="request">The expense being submitted.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <param name="id">The Expense ID</param>
     /// <returns>
@@ -153,5 +152,76 @@ public class ExpensesController(IExpensesService expensesService, ICurrentUserSe
         ApiLogs.OperationCompleted(logger, ctx, user.TenantId, user.EmployeeId);
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Returns all pending expenses for the authenticated user's tenant.
+    /// </summary>
+    /// <param name="request">Pagination request</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>
+    /// <see cref="OkObjectResult"/> with pending expenses when the request succeeds;
+    /// otherwise an error response mapped from the service result.
+    /// </returns>
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<Expense>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<Expense>>> GetExpensesAsync([FromQuery] GetPaginatedExpensesRequest request, CancellationToken cancellationToken)
+    {
+        var ctx = CreateLogContext();
+        var user = GetCurrentUserIds();
+
+        ApiLogs.OperationStarted(logger, ctx, user.TenantId, user.EmployeeId);
+
+        var dto = mapper.Map<PaginationRequestDto>(request);
+        
+        var result = await expensesService.GetAllExpensesByEmployeeTenant(dto, cancellationToken);
+
+        if (!result.Success)
+        {
+            ApiLogs.OperationRejected(logger, ctx, user.TenantId, "Request failed", GetFailureStatusCode(result));
+            
+            return FromPagedResult(result, _ => Ok());
+        }
+
+        var response = mapper.Map<IEnumerable<Expense>>(result.Items);
+
+        ApiLogs.OperationCompleted(logger, ctx, user.TenantId, detail: $"count={result.Items.Count}");
+
+        return result.Items.Count > 0 ? Ok(response) : NotFound();
+    }
+    
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(GetPendingExpensesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<DetailedExpense>> GetExpenseDetailsAsync([FromRoute] Guid id, GetPaginatedExpensesRequest request, CancellationToken cancellationToken)
+    {
+        var ctx = CreateLogContext();
+        var user = GetCurrentUserIds();
+
+        ApiLogs.OperationStarted(logger, ctx, user.TenantId, user.EmployeeId);
+        
+        var result = await expensesService.GetDetailedExpenseById(id, cancellationToken);
+        
+        if (!result.Success)
+        {
+            ApiLogs.OperationRejected(logger, ctx, user.TenantId, "Request failed", GetFailureStatusCode(result));
+            
+            return FromResult(result, _ => Ok());
+        }
+
+        var response = mapper.Map<DetailedExpense>(result);
+
+        ApiLogs.OperationCompleted(logger, ctx, user.TenantId, detail: $"Item={result}");
+
+        return response != null? Ok(response) : NotFound();
     }
 }

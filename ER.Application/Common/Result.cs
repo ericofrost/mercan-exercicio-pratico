@@ -6,7 +6,7 @@ namespace ER.Application.Common;
 /// Represents the outcome of an application operation with a typed payload.
 /// </summary>
 /// <typeparam name="T">The type of the successful result value.</typeparam>
-public class Result<T>
+public class Result<T> : IOperationResult
 {
     /// <summary>
     /// Gets or sets the successful payload when <see cref="Success"/> is <c>true</c>.
@@ -61,4 +61,10 @@ public class Result<T>
         Error.Add(new Error(errorMessage, errorType));
         Success = false;
     }
+
+    bool IOperationResult.IsSuccessful => Success;
+
+    ValidationResult IOperationResult.Validation => Validation;
+
+    IReadOnlyList<Error> IOperationResult.Errors => Error;
 }

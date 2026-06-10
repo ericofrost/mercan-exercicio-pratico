@@ -9,9 +9,13 @@ public interface IExpensesService
 {
     Task<ExpenseByTenantResult> GetAllExpensesByManagerTenant(CancellationToken cancellationToken = default);
     
+    Task<PagedResult<ExpenseDto>> GetAllExpensesByEmployeeTenant(PaginationRequestDto requestDto, CancellationToken cancellationToken = default);
+    
     Task<Result<bool>> SubmitExpenseAsync(SubmitExpenseRequestDto expense, CancellationToken cancellationToken = default);
     
     Task<Result<bool>> ApproveExpenseAsync(ChangeExpenseStatusDto approvalRequest, CancellationToken cancellationToken = default);
     
     Task<Result<bool>> RejectExpenseAsync(ChangeExpenseStatusDto rejectRequest, CancellationToken cancellationToken = default);
+    
+    Task<DetailedExpenseResult> GetDetailedExpenseById(Guid id, CancellationToken cancellationToken = default);
 }
